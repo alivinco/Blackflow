@@ -2,7 +2,7 @@ from time import sleep
 from unittest import TestCase
 from smartlylib.service.Service import ServiceRunner
 from adapters.mqtt_adapter import MqttAdapter
-from core.rule_runner import RuleRunner
+from core.app_runner import AppRunner
 from libs.context import BfContext
 
 __author__ = 'alivinco'
@@ -17,7 +17,7 @@ class TestRuleRunner(TestCase):
     def setUp(self):
         self.context = BfContext()
         self.mqtt_adapter_service = MqttAdapter(self.context)
-        self.rule_runner = RuleRunner(self.context,[self.mqtt_adapter_service])
+        self.app_runner = AppRunner(self.context,[self.mqtt_adapter_service])
 
     # def test_load_rules(self):
     #     self.rule_runner.load_rules()
@@ -25,13 +25,13 @@ class TestRuleRunner(TestCase):
     def test_run(self):
 
         # self.rule_runner.load_rules()
-        sr = ServiceRunner(self.rule_runner)
+        sr = ServiceRunner(self.app_runner)
         sr.start()
         sr2 = ServiceRunner(self.mqtt_adapter_service)
         sr2.start()
         sleep(1)
-        self.context.set("home",{"mode":"at_home"})
-        self.context.set("mqtt:/dev/zw/75/bin_motion/1/events",{"event":{"default":{"value":True}}})
+        self.context.set("home", {"mode": "at_home"})
+        self.context.set("mqtt:/dev/zw/75/bin_motion/1/events", {"event": {"default": {"value": True}}})
         sleep(1)
 
         sr.stop()

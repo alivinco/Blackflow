@@ -11,8 +11,9 @@ class Adapter(Service):
     adapter = "test:"
 
     def __init__(self,context,name):
-        self.context = context
         super(Adapter, self).__init__(name)
+        self.context = context
+        self.context.add_adapter(self)
 
     def subscribe(self,topic):
         pass

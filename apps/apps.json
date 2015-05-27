@@ -1,0 +1,19 @@
+[
+  {
+    "id":12,
+    "name":"LightsControl",
+    "alias":"LightControl_1",
+    "sub_for":{"motion_sensor":"mqtt:/dev/zw/75/bin_motion/1/events","light_sensor":"mqtt:/dev/zw/45/sen_luminance/1/events"},
+    "pub_to"  :{"switch":"mqtt:/dev/serial/99/bin_switch/commands"},
+    "configs":{"param1":"value1"}
+  },
+   {
+    "id":14,
+    "name":"LightsControl",
+    "alias":"LightControl_2",
+    "sub_for":{"motion_sensor":"mqtt:/dev/zw/100/bin_motion/1/events","light_sensor":"mqtt:/dev/zw/100/sen_luminance/1/events"},
+    "pub_to"  :{"switch":"mqtt:/dev/serial/99/bin_switch/commands"},
+    "configs":{"param1":"value2"}
+  }
+
+]

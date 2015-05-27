@@ -2,7 +2,7 @@
 import signal
 import time
 from adapters.mqtt_adapter import MqttAdapter
-from core.rule_runner import RuleRunner
+from core.app_runner import AppRunner
 from libs.context import BfContext
 
 __author__ = 'alivinco'
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     context = BfContext()
     mqtt_adapter_service = MqttAdapter(context)
     adapters.append(mqtt_adapter_service)
-    rule_runner_service = RuleRunner(context,adapters)
+    rule_runner_service = AppRunner(context,adapters)
 
     service_manager.register(rule_runner_service)
     service_manager.register(mqtt_adapter_service)

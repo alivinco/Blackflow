@@ -1,12 +1,10 @@
+__author__ = 'alivinco'
 import json
 import logging
-from smartlylib.service.Service import Service
 from adapters.adapter import Adapter
 
-__author__ = 'alivinco'
-
 import libs.paho.mqtt.client as mqtt
-log = logging.getLogger("bf_rules_runner")
+log = logging.getLogger("mqtt_adapter")
 
 class MqttAdapter(Adapter):
     adapter_prefix = "mqtt:"
@@ -24,7 +22,9 @@ class MqttAdapter(Adapter):
     def subscribe(self,topic):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix,"")
-            self.mqtt.subscribe(topic,qos=1)
+            log.info("Mqtt adapter subscribing for topic = %s"%topic)
+            # topic = topic.encode('ascii','ignore')
+            self.mqtt.subscribe(str(topic),qos=1)
 
     def unsubscribe(self,topic):
         if self.adapter_prefix in topic:
@@ -32,7 +32,7 @@ class MqttAdapter(Adapter):
             self.mqtt.unsubscribe(topic)
 
     def on_message(self,client,userdata,msg):
-        self.context.set(self.adapter_prefix+msg.topic,json.loads(msg.payload))
+        self.context.set(self.adapter_prefix + msg.topic, json.loads(msg.payload), src_name=self, src_type="adapter")
 
     def publish(self,topic,msg):
         if self.adapter_prefix in topic:

@@ -1,8 +1,0 @@
-[
-  {
-    "id":12,
-    "name":"light_control",
-    "listen_to":["/dev/zw/75/bin_motion/1/events"],
-    "class":"LightsControl"
-  }
-]

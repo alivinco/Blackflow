@@ -58,7 +58,7 @@ class Flow():
         :param msg:
         """
         if topic in self.receive_table:
-            self.receive_event.set({"topic":topic,"msg":msg})
+            self.receive_event.set({"topic": topic, "msg": msg})
 
 
     def _wait(self,timeout):
