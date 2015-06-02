@@ -1,8 +1,6 @@
 import logging
 from core.app import BfApp
 
-__author__ = 'alivinco'
-
 log = logging.getLogger("LightsControl")
 
 class LightsControl(BfApp):

@@ -2,6 +2,7 @@ from time import sleep
 from unittest import TestCase
 from smartlylib.service.Service import ServiceRunner
 from adapters.mqtt_adapter import MqttAdapter
+from core.app_manager import AppManager
 from core.app_runner import AppRunner
 from libs.context import BfContext
 
@@ -17,7 +18,9 @@ class TestRuleRunner(TestCase):
     def setUp(self):
         self.context = BfContext()
         self.mqtt_adapter_service = MqttAdapter(self.context)
-        self.app_runner = AppRunner(self.context,[self.mqtt_adapter_service])
+        adapters = [self.mqtt_adapter_service]
+        self.app_manager = AppManager(self.context,adapters)
+        self.app_runner = AppRunner(self.context,adapters,self.app_manager)
 
     # def test_load_rules(self):
     #     self.rule_runner.load_rules()
