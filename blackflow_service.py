@@ -2,6 +2,7 @@
 import signal
 import time
 from adapters.mqtt_adapter import MqttAdapter
+from core.app_manager import AppManager
 from core.app_runner import AppRunner
 from libs.context import BfContext
 
@@ -37,9 +38,11 @@ if __name__ == "__main__":
     adapters = []
     log.info("Starting application")
     context = BfContext()
+
     mqtt_adapter_service = MqttAdapter(context)
     adapters.append(mqtt_adapter_service)
-    rule_runner_service = AppRunner(context,adapters)
+    app_manager = AppManager(context,adapters)
+    rule_runner_service = AppRunner(context,adapters,app_manager)
 
     service_manager.register(rule_runner_service)
     service_manager.register(mqtt_adapter_service)
@@ -47,6 +50,8 @@ if __name__ == "__main__":
     # service = ServiceRunner(RuleRunner(context))
     service_manager.start()
     service_manager.waitStartup(10)
+    app_manager.start_apps()
+
     while service_manager.getState()==ServiceState.RUN:
         time.sleep(1)
     if not service_manager.waitShutdown(10):

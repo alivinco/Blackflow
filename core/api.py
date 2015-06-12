@@ -1,6 +1,8 @@
 __author__ = 'alivinco'
 
 class BlackflowApi:
+    def __init__(self,app_manager):
+        self.app_manager=app_manager
 
     def add_app(self,name,src):
         pass

@@ -4,5 +4,11 @@
     "sub_for":["motion_sensor","light_sensor"],
     "pub_to" :["switch"],
     "configs":["param1"]
+  },
+  {
+    "name":"PullCordSirenApp",
+    "sub_for":["pull_cord"],
+    "pub_to" :["siren_control"],
+    "configs":[]
   }
 ]

@@ -21,7 +21,6 @@ class AppRunner(Service):
 
     def initialize(self):
         log.info("***Initializing configured_app_instances runner service....")
-        self.app_manager.initialize()
 
     def on_context_change(self, var_name):
         """

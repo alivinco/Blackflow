@@ -32,6 +32,7 @@ class TestRuleRunner(TestCase):
         sr.start()
         sr2 = ServiceRunner(self.mqtt_adapter_service)
         sr2.start()
+        self.app_manager.start_apps()
         sleep(1)
         self.context.set("home", {"mode": "at_home"})
         self.context.set("mqtt:/dev/zw/75/bin_motion/1/events", {"event": {"default": {"value": True}}})

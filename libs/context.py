@@ -43,4 +43,7 @@ class BfContext:
                 self.adapter_sync(key,value)
 
     def get(self,key):
-        return self.context[key]["value"]
+        try:
+            return self.context[key]["value"]
+        except:
+            return None
