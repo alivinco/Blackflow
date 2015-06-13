@@ -10,10 +10,10 @@ class PullCordSirenApp(BfApp):
         log.info("%s app was triggered by %s"%(self.name,triggered_by))
         if self.context.get("pull_cord_is_on"):
             self.context.set("pull_cord_is_on", False , self)
-            self.context.set(self.pub_to["siren_control"], self.siren_control("off"), self)
+            self.context.set(self.pub_to["siren_control"], self.siren_control("chime"), self)
         else:
             self.context.set("pull_cord_is_on", True , self)
-            self.context.set(self.pub_to["siren_control"], self.siren_control("fire"), self)
+            self.context.set(self.pub_to["siren_control"], self.siren_control("chime"), self)
             log.info("Actionnnn by %s"%self.alias)
 
     def siren_control(self,state):

@@ -4,6 +4,7 @@ import time
 from adapters.mqtt_adapter import MqttAdapter
 from core.app_manager import AppManager
 from core.app_runner import AppRunner
+from handlers.api_mqtt_handler import ApiMqttHandler
 from libs.context import BfContext
 
 __author__ = 'alivinco'
@@ -43,6 +44,8 @@ if __name__ == "__main__":
     adapters.append(mqtt_adapter_service)
     app_manager = AppManager(context,adapters)
     rule_runner_service = AppRunner(context,adapters,app_manager)
+    api_mqtt_handler = ApiMqttHandler(app_manager,mqtt_adapter_service)
+    mqtt_adapter_service.set_api_handler(api_mqtt_handler)
 
     service_manager.register(rule_runner_service)
     service_manager.register(mqtt_adapter_service)
@@ -50,7 +53,9 @@ if __name__ == "__main__":
     # service = ServiceRunner(RuleRunner(context))
     service_manager.start()
     service_manager.waitStartup(10)
+    # app manager and api ghandler can be initialized only when mqtt adapter is running.
     app_manager.start_apps()
+    api_mqtt_handler.start()
 
     while service_manager.getState()==ServiceState.RUN:
         time.sleep(1)

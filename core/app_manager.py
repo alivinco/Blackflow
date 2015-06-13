@@ -38,7 +38,7 @@ class AppManager:
     def get_apps(self):
         return self.app_defs
 
-    def get_app_instance(self, instance_id=None, instance_alias=None):
+    def get_app_instance(self, instance_id, instance_alias=None):
         if instance_id:
             return filter(lambda app_inst: app_inst.id == instance_id, self.configured_app_instances)[0]
         elif instance_alias:
@@ -47,7 +47,7 @@ class AppManager:
     def get_app_configs(self):
         return self.app_configs
 
-    def reload_app_instance(self, app_name, instance_id):
+    def reload_app_instance(self,instance_id,app_name = ""):
         """
         1) unsubscribe from adapters
         2) stop app instance
@@ -55,13 +55,16 @@ class AppManager:
         :param app_name:
         :param instance_id:
         """
-        ai = self.get_app_instances(instance_id=instance_id)
+        log.info("Reloading app . id = %s name = %s"%(instance_id,app_name))
+
+        ai = self.get_app_instance(instance_id)
         log.info("Unsubscribing from app's topics")
-        for key, topic in ai.sub_for:
+        for key, topic in ai.sub_for.iteritems():
             for adapter in self.adapters:
                 adapter.unsubscribe(topic)
         log.info("Deleting app instance")
         self.configured_app_instances.remove(ai)
+        self.load_definitions()
         self.configure_and_init_app_instance(instance_id)
 
     def reload_app(self, app_name):

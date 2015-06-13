@@ -14,25 +14,33 @@ class MqttAdapter(Adapter):
         self.mqtt.on_message = self.on_message
         self.hostname = "localhost"
         self.port = 1883
+        self.api_handler = None
 
     def set_connection_params(self,hostname,port=1883):
         self.hostname = hostname
         self.port = port
 
+    def set_api_handler(self,api_handler):
+        self.api_handler = api_handler
+
     def subscribe(self,topic):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix,"")
             log.info("Mqtt adapter subscribing for topic = %s"%topic)
-            # topic = topic.encode('ascii','ignore')
             self.mqtt.subscribe(str(topic),qos=1)
 
     def unsubscribe(self,topic):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix,"")
-            self.mqtt.unsubscribe(topic)
+            self.mqtt.unsubscribe(str(topic))
 
     def on_message(self,client,userdata,msg):
-        self.context.set(self.adapter_prefix + msg.topic, json.loads(msg.payload), src_name=self, src_type="adapter")
+        jmsg = json.loads(msg.payload)
+        self.context.set(self.adapter_prefix + msg.topic, jmsg, src_name=self, src_type="adapter")
+        try:
+            self.api_handler.route(msg.topic,jmsg)
+        except Exception as ex:
+            log.exception(ex)
 
     def publish(self,topic,msg):
         if self.adapter_prefix in topic:
