@@ -44,7 +44,7 @@ if __name__ == "__main__":
     adapters.append(mqtt_adapter_service)
     app_manager = AppManager(context,adapters)
     rule_runner_service = AppRunner(context,adapters,app_manager)
-    api_mqtt_handler = ApiMqttHandler(app_manager,mqtt_adapter_service)
+    api_mqtt_handler = ApiMqttHandler(app_manager,mqtt_adapter_service,context)
     mqtt_adapter_service.set_api_handler(api_mqtt_handler)
 
     service_manager.register(rule_runner_service)

@@ -1,11 +1,11 @@
+import sys
+
 __author__ = 'alivinco'
 import importlib
 import json
 import os
 import logging
-
 log = logging.getLogger("bf_app_manager")
-
 
 class AppManager:
     def __init__(self, context, adapters):
@@ -68,7 +68,15 @@ class AppManager:
         self.configure_and_init_app_instance(instance_id)
 
     def reload_app(self, app_name):
-        reload("apps.lib." + app_name)
+        log.info("Reloading app module %s"%app_name)
+        mod_ref = sys.modules["apps.lib." + app_name]
+        reload(mod_ref)
+        mod_ref = sys.modules["apps.lib." + app_name]
+        self.app_classes[app_name] = getattr(mod_ref,app_name)
+        self.app_classes[app_name].context = self.context
+        apps = filter(lambda app_conf:app_conf["name"]==app_name,self.app_configs)
+        for app in apps:
+            self.reload_app_instance(app["id"],app_name)
 
     def load_app_classes(self):
         """

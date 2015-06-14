@@ -29,8 +29,11 @@ class BfApp:
     def run(self,triggered_by):
         raise NotImplementedError()
 
+    def var_set(self,name,value):
+        self.context.set(name,value,self)
 
-
+    def var_get(self,name):
+        return self.context.get(name)
 
 
 

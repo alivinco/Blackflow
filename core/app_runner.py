@@ -32,7 +32,7 @@ class AppRunner(Service):
     def run(self):
         while not self.isStopped():
             try:
-                change_var_name = self.context_change_queue.get(timeout=10)
+                change_var_name = self.context_change_queue.get(timeout=2)
             except Empty:
                 continue
             log.debug("config app instance size %s"%len(self.configured_app_instances))

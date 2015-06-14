@@ -1,7 +1,9 @@
 import logging
 from core.app import BfApp
 
-log = logging.getLogger("LightsControl")
+
+
+log = logging.getLogger("PullCordSirenApp")
 
 class PullCordSirenApp(BfApp):
     name = "PullCordSirenApp"
@@ -14,7 +16,7 @@ class PullCordSirenApp(BfApp):
         else:
             self.context.set("pull_cord_is_on", True , self)
             self.context.set(self.pub_to["siren_control"], self.siren_control("chime"), self)
-            log.info("Actionnnn by %s"%self.alias)
+            log.info("Turning siren 4 on  %s"%self.alias)
 
     def siren_control(self,state):
         return {

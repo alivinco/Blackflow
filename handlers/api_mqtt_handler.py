@@ -1,15 +1,18 @@
+import libs
+
 __author__ = 'alivinco'
 import logging
-
+from libs import msg_template
 log = logging.getLogger("bf_api_mqtt_handl")
 
 class ApiMqttHandler:
-    sub_topic = "mqtt:/app/blackflow/commands"
-    pub_topic = "mqtt:/app/blackflow/events"
+    sub_topic = "/app/blackflow/commands"
+    pub_topic = "/app/blackflow/events"
 
-    def __init__(self,app_manager,mqtt_adapter):
+    def __init__(self,app_manager,mqtt_adapter,context):
         self.app_man = app_manager
         self.mqtt_adapter = mqtt_adapter
+        self.context = context
 
     def start(self):
         self.mqtt_adapter.subscribe(self.sub_topic)
@@ -40,6 +43,13 @@ class ApiMqttHandler:
             elif msg_subtype == "get_apps":
                 pass
             elif msg_subtype == "get_app_instances":
+                pass
+            elif msg_subtype == "context_get":
+                msg = msg_template.generate_msg_template("blackflow","event","blackflow","context")
+                msg["event"]["properties"] = self.context.get_dict()
+                self.mqtt_adapter.publish(self.pub_topic,msg)
+
+            elif msg_subtype == "context_set":
                 pass
 
         elif msg_type == "config":

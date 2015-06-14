@@ -47,3 +47,6 @@ class BfContext:
             return self.context[key]["value"]
         except:
             return None
+
+    def get_dict(self):
+            return self.context
