@@ -22,6 +22,14 @@
     "sub_for":{"pull_cord":"mqtt:/dev/zw/87/mod_alarm/1/events"},
     "pub_to"  :{"siren_control":"mqtt:/dev/zw/84/mod_siren/1/commands"},
     "configs":{}
+  },
+  {
+    "id":16,
+    "name":"Pushnotificator",
+    "alias":"Pushnotificator",
+    "sub_for":{"push_cmd":"mqtt:/app/bf_pushnotificator/commands"},
+    "pub_to"  :{},
+    "configs":{"api_key":"hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2"}
   }
 
 ]

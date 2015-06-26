@@ -1,32 +1,18 @@
-
+__author__ = 'alivinco'
+import sys
+sys.path.append("./libs/site-packages")
 import signal
 import time
+from libs.context import BfContext
 from adapters.mqtt_adapter import MqttAdapter
 from core.app_manager import AppManager
 from core.app_runner import AppRunner
 from handlers.api_mqtt_handler import ApiMqttHandler
-from libs.context import BfContext
-
-__author__ = 'alivinco'
-from smartlylib.service.Service import ServiceRunner, Service, ServiceManager, ServiceState
+from smartlylib.service.Service import ServiceManager, ServiceState
 import logging, logging.config
 import configs.log
-
 logging.config.dictConfig(configs.log.config)
 log = logging.getLogger("bf_rules_runner")
-
-
-
-# class BlackflowService(Service):
-#     def __init__(self,context):
-#         super(BlackflowService, self).__init__(self.__class__.__name__)
-#         self.context = context
-#
-#     def initialize(self):
-#         log.info("***Initializing application.....")
-#
-#     def run(self):
-#         pass
 
 def sigterm_handler(signum, frame):
         log.info("Received signal #%d: %s. Shutting down service" % (signum, frame))

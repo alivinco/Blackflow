@@ -3,7 +3,7 @@ import json
 import logging
 from adapters.adapter import Adapter
 
-import libs.paho.mqtt.client as mqtt
+import paho.mqtt.client as mqtt
 
 log = logging.getLogger("mqtt_adapter")
 

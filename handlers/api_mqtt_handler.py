@@ -32,8 +32,13 @@ class ApiMqttHandler:
                self.app_man.reload_app_instance(msg["command"]["default"]["value"])
             elif msg_subtype == "control_app":
                 pass
-            elif msg_subtype == "upload_app":
-                pass
+            elif msg_subtype == "add_app":
+                app_name = msg["command"]["properties"]["name"]
+                sub_for = msg["command"]["properties"]["sub_for"]
+                pub_to = msg["command"]["properties"]["pub_to"]
+                configs = msg["command"]["properties"]["configs"]
+                src = msg["command"]["properties"]["src"]
+
             elif msg_subtype == "configure_app_instance":
                 pass
             elif msg_subtype == "delete_app":

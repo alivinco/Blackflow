@@ -9,34 +9,59 @@ log = logging.getLogger("bf_app_manager")
 
 class AppManager:
     def __init__(self, context, adapters):
+        self.apps_dir_path = "apps"
         self.configured_app_instances = []
         self.app_classes = {}
-        self.app_defs = None
+        self.app_descriptors = None
+        # self.app_defs_path = os.path.join(self.apps_dir_path, "apps.json")
         self.app_configs = None
-        self.apps_dir_path = "apps"
-        self.load_definitions()
         self.context = context
         self.adapters = adapters
-        self.load_app_classes()
         # self.configure_and_init_app_instance()
         log.info("App init process completed. %s apps were initialized and configured " % len(self.configured_app_instances))
 
     def start_apps(self):
+        self.load_app_descriptors()
+        self.load_app_configs()
+        self.load_app_classes()
         self.configure_and_init_app_instance()
 
-    def load_definitions(self):
+    def add_new_app(self,name,sub_for,pub_to,configs,src):
+        f_name = os.path.join(self.app_configs,"lib",name)
+        with open(f_name,"w") as f :
+            f.write(src)
+        self.app_descriptors.append({"name":name,"sub_for":sub_for,"pub_to":pub_to,"configs":configs})
+        self.serialize_app_defs()
+
+    # def serialize_app_defs(self):
+    #     with open(self.app_defs_path,"w") as f :
+    #         f.write(json.dumps(self.app_descriptors, indent=True))
+
+    def load_app_configs(self):
+        self.app_configs = json.load(file(os.path.join(self.apps_dir_path, "app_configs.json")))
+
+    def load_app_descriptors(self):
         """
-        The method loads app and app's configuration definitions from config files
+        Loads application descriptors
 
         """
-        self.app_defs = json.load(file(os.path.join(self.apps_dir_path, "apps.json")))
-        self.app_configs = json.load(file(os.path.join(self.apps_dir_path, "app_configs.json")))
+        self.app_descriptors = []
+        apps_lib_path = os.path.join(self.apps_dir_path,"lib")
+        for item in os.listdir(apps_lib_path):
+            if item not in ("__init__.py","__init__.pyc"):
+                self.app_descriptors.append(json.load(file(os.path.join(self.apps_dir_path,'lib',item, item+".json"))))
+                print "%s"%(item)
 
     def get_app_instances(self):
         return self.configured_app_instances
 
     def get_apps(self):
-        return self.app_defs
+        """
+        Return list of app interfaces .
+
+        :return:
+        """
+        return self.app_descriptors
 
     def get_app_instance(self, instance_id, instance_alias=None):
         if instance_id:
@@ -64,27 +89,35 @@ class AppManager:
                 adapter.unsubscribe(topic)
         log.info("Deleting app instance")
         self.configured_app_instances.remove(ai)
-        self.load_definitions()
+        self.load_app_configs()
         self.configure_and_init_app_instance(instance_id)
 
     def reload_app(self, app_name):
         log.info("Reloading app module %s"%app_name)
-        mod_ref = sys.modules["apps.lib." + app_name]
-        reload(mod_ref)
-        mod_ref = sys.modules["apps.lib." + app_name]
-        self.app_classes[app_name] = getattr(mod_ref,app_name)
-        self.app_classes[app_name].context = self.context
-        apps = filter(lambda app_conf:app_conf["name"]==app_name,self.app_configs)
-        for app in apps:
-            self.reload_app_instance(app["id"],app_name)
+        mod_ref = sys.modules["apps.lib.%s.%s"%(app_name,app_name)]
+        reload_success = False
+        try:
+            reload(mod_ref)
+            reload_success = True
+        except Exception as ex:
+            log.exception(ex)
+            #TODO: Send notification via API
+
+        if reload_success:
+            mod_ref = sys.modules["apps.lib.%s.%s"%(app_name,app_name)]
+            self.app_classes[app_name] = getattr(mod_ref,app_name)
+            self.app_classes[app_name].context = self.context
+            apps = filter(lambda app_conf:app_conf["name"]==app_name,self.app_configs)
+            for app in apps:
+                self.reload_app_instance(app["id"],app_name)
 
     def load_app_classes(self):
         """
         The method import and stores class definitions into dict , so they can be used to create app instances .
 
         """
-        for app_def in self.app_defs:
-            imp_mod = importlib.import_module("apps.lib." + app_def["name"])
+        for app_def in self.app_descriptors:
+            imp_mod = importlib.import_module("apps.lib.%s.%s"%(app_def["name"],app_def["name"]))
             app_class = getattr(imp_mod, app_def["name"])
             app_class.context = self.context
             self.app_classes[app_def["name"]] = app_class

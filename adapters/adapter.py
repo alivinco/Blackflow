@@ -1,10 +1,8 @@
-import json
 import logging
 from smartlylib.service.Service import Service
 
 __author__ = 'alivinco'
 
-import libs.paho.mqtt.client as mqtt
 log = logging.getLogger("bf_rules_runner")
 
 class Adapter(Service):
