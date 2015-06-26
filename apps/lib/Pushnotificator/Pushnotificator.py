@@ -17,8 +17,3 @@ class Pushnotificator(BfApp):
         pushb = PushBullet(self.config_get("api_key"))
         pushb.push_note(title,body)
 
-
-if __name__ == "__main__":
-    pushb = PushBullet("hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2")
-    pushb.push_note("test","test body")
-

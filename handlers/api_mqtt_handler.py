@@ -28,6 +28,9 @@ class ApiMqttHandler:
         if msg_type == "blackflow":
             if msg_subtype == "reload_app" :
                self.app_man.reload_app(msg["command"]["default"]["value"])
+            if msg_subtype == "load_new_app" :
+               self.app_man.load_new_app(msg["command"]["default"]["value"])
+
             elif msg_subtype == "reload_app_instance":
                self.app_man.reload_app_instance(msg["command"]["default"]["value"])
             elif msg_subtype == "control_app":

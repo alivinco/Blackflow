@@ -30,7 +30,6 @@ class AppManager:
         f_name = os.path.join(self.app_configs,"lib",name)
         with open(f_name,"w") as f :
             f.write(src)
-        self.app_descriptors.append({"name":name,"sub_for":sub_for,"pub_to":pub_to,"configs":configs})
         self.serialize_app_defs()
 
     # def serialize_app_defs(self):
@@ -57,23 +56,28 @@ class AppManager:
 
     def get_apps(self):
         """
-        Return list of app interfaces .
+        Return list of app descriptors .
 
         :return:
         """
         return self.app_descriptors
 
     def get_app_instance(self, instance_id, instance_alias=None):
-        if instance_id:
-            return filter(lambda app_inst: app_inst.id == instance_id, self.configured_app_instances)[0]
-        elif instance_alias:
-            return filter(lambda app_inst: app_inst.alias == instance_alias, self.configured_app_instances)[0]
+        try :
+            if instance_id:
+                return filter(lambda app_inst: app_inst.id == instance_id, self.configured_app_instances)[0]
+            elif instance_alias:
+                return filter(lambda app_inst: app_inst.alias == instance_alias, self.configured_app_instances)[0]
+        except :
+            return None
 
     def get_app_configs(self):
         return self.app_configs
 
     def reload_app_instance(self,instance_id,app_name = ""):
         """
+        The method recreates app instance . Class is not reloaded .
+        Should be invoked after configuration parameters were modified .
         1) unsubscribe from adapters
         2) stop app instance
         3) start new app instance
@@ -83,16 +87,39 @@ class AppManager:
         log.info("Reloading app . id = %s name = %s"%(instance_id,app_name))
 
         ai = self.get_app_instance(instance_id)
-        log.info("Unsubscribing from app's topics")
-        for key, topic in ai.sub_for.iteritems():
-            for adapter in self.adapters:
-                adapter.unsubscribe(topic)
-        log.info("Deleting app instance")
-        self.configured_app_instances.remove(ai)
-        self.load_app_configs()
+        if ai :
+            log.info("Unsubscribing from app's topics")
+            for key, topic in ai.sub_for.iteritems():
+                for adapter in self.adapters:
+                    adapter.unsubscribe(topic)
+            log.info("Deleting app instance")
+            self.configured_app_instances.remove(ai)
+            self.load_app_configs()
         self.configure_and_init_app_instance(instance_id)
 
+    def load_new_app(self , app_name):
+        """
+        The method loads and initializes new app
+        :param app_name: App name
+        :param instance_id: App configuration instance id
+        """
+        log.info("Loading %s app descriptor and class"%app_name)
+        try:
+            self.app_descriptors.append(json.load(file(os.path.join(self.apps_dir_path,'lib',app_name, app_name+".json"))))
+            # loading app class
+            imp_mod = importlib.import_module("apps.lib.%s.%s"%(app_name,app_name))
+            app_class = getattr(imp_mod, app_name)
+            app_class.context = self.context
+            self.app_classes[app_name] = app_class
+        except Exception as ex:
+            log.exception(ex)
+            #TODO: post error via msg adapter
+
     def reload_app(self, app_name):
+        """
+        Reloads app class and reinitialize app instance . Should be invoked when app source code was changed.
+        :param app_name:
+        """
         log.info("Reloading app module %s"%app_name)
         mod_ref = sys.modules["apps.lib.%s.%s"%(app_name,app_name)]
         reload_success = False
@@ -127,7 +154,7 @@ class AppManager:
         Method creates app instances and configures them using configuration definitions .
         :param instance_id: optional paramters , if not specified then all instances are loaded , if specified then only one instance is loaded
         """
-        log.info("Initializing app instance")
+        log.info("Initializing app instance . Instance id = %s"%instance_id)
 
         for app_config in self.app_configs:
             if instance_id == None or app_config["id"] == instance_id:
