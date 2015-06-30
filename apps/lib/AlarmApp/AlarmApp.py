@@ -1,26 +1,34 @@
 import logging
-from libs.msg_template import generate_msg_template
 from core.app import BfApp
 
 log = logging.getLogger(__name__)
 
-class PullCordSirenApp(BfApp):
+class AlarmApp(BfApp):
     name = __name__
+
+    def init_app(self):
+        log.info("Initializing alarm app")
 
     def run(self,triggered_by):
         log.info("%s app was triggered by %s"%(self.name,triggered_by))
-        if self.var_get("pull_cord_is_on"):
-            self.var_set("pull_cord_is_on", False )
-            self.publish("siren_control", self.siren_control("chime"))
-        else:
-            self.var_set("pull_cord_is_on", True )
-            self.publish("siren_control", self.siren_control("chime"))
-            log.info("Turning siren 5 on  %s"%self.alias)
+        trigger_value = self.var_get(triggered_by)["command"]["default"]["value"]
+        elapsed_time = self.context.get_time_since_last_update("alarm_state")
+        if trigger_value:
+            if self.var_get("alarm_state")=="armed":
+               self.notify(triggered_by)
+            elif self.var_get("alarm_state")=="alarm" and self.config_get("alarm_state_timeout")<elapsed_time:
+               self.notify(triggered_by)
+        elif self.config_get("alarm_state_timeout")<elapsed_time:
+            self.var_set("alarm_state", "armed" )
 
-    def siren_control(self,state):
-        msg = generate_msg_template(self.name,"command","mode","siren")
-        msg["command"]["default"]["value"] = state
-        return msg
+
+    def notify(self,description):
+        self.var_set("alarm_state", "alarm" )
+        self.var_set("push_notification",
+                             {"command":{"properties":
+                                             {"title":"Alarm",
+                                              "body":"Triggered by %s"%description,
+                                              "address":None}}})
 
 
 

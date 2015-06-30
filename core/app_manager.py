@@ -159,6 +159,7 @@ class AppManager:
         for app_config in self.app_configs:
             if instance_id == None or app_config["id"] == instance_id:
                 app_inst = self.app_classes[app_config["name"]](app_config["id"], app_config["alias"], app_config["sub_for"], app_config["pub_to"], app_config["configs"])
+                app_inst.init_app()
                 log.info("Apps with id = %s , name = %s , alias = %s was loaded." % (app_inst.id, app_inst.name, app_inst.alias))
 
                 # setting up subscriptions in adapters

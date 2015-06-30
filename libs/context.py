@@ -15,6 +15,10 @@ class BfContext:
         self.adapters = []
 
     def on_context_change(self,var_name):
+        """
+        The method should be overriden
+        :param var_name:
+        """
         pass
 
     def add_adapter(self,adapter_inst):
@@ -47,6 +51,18 @@ class BfContext:
             return self.context[key]["value"]
         except:
             return None
+
+    def get_time_since_last_update(self,key):
+        """
+        Return time elapsed time since last variable update .
+        :param key:
+        :return: seconds as floating point since last update
+        """
+        if key in self.context:
+            start_time = self.context[key]["timestamp"]
+        else :
+            start_time = 0
+        return time.time() - start_time
 
     def get_dict(self):
             return self.context

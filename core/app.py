@@ -27,9 +27,12 @@ class BfApp:
     def get_id(self):
         return self.id
 
+    def init_app(self):
+        pass
+
     def run(self,triggered_by):
         """
-        The method is triggere on message
+        The method is triggered by context change and is executed within it's own thread .
         :type triggered_by: variable name which has triggered app execution . If call was intiated by adapter it will
         be preffixed with adapter name , for instance mqtt:/dev/zw/87/mod_alarm/1/events
         """
