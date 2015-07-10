@@ -7,6 +7,10 @@ class AlarmApp(BfApp):
     name = __name__
 
     def init_app(self):
+        """
+
+
+        """
         log.info("Initializing alarm app")
 
     def run(self,triggered_by):

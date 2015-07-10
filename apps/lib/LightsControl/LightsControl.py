@@ -9,14 +9,14 @@ class LightsControl(BfApp):
     def run(self,triggered_by):
         # self.publish("/dev/zw/75/bin_switch/1/commands","binary.switch",True)
         log.info("LightControll app was triggered by %s"%triggered_by)
-        if self.context.get(self.sub_for["motion_sensor"])["event"]["default"]["value"]:
+        if self.self.var_get(triggered_by)["event"]["default"]["value"]:
             self.context.set("lights_state", "off", self)
-            self.context.set(self.pub_to["switch"], self.lights_on(), self)
+            self.publish("switch", self.lights_control())
             log.info("Actionnnn by %s"%self.alias)
         else :
             log.info("Lights are already ON ")
 
-    def lights_on(self):
+    def lights_control(self,state):
         return {
                      "origin": {
                       "vendor": "Blackflow",
@@ -27,7 +27,7 @@ class LightsControl(BfApp):
                      "creation_time": 1385815582,
                      "command": {
                       "default": {
-                       "value": True
+                       "value": state
                       },
                       "subtype": "switch",
                       "@type": "binary",

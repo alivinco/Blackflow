@@ -19,8 +19,8 @@
     "id":15,
     "name":"PullCordSirenApp",
     "alias":"PullCordSirenApp",
-    "sub_for":{"pull_cord":"mqtt:/dev/zw/87/mod_alarm/1/events"},
-    "pub_to"  :{"siren_control":"mqtt:/dev/zw/84/mod_siren/1/commands"},
+    "sub_for":{"pull_cord":"mqtt:/dev/zw/87/mod_alarm/1/events","emergency_button":"mqtt:/dev/zw/90/mod_alarm/1/events"},
+    "pub_to"  :{"siren_control":"mqtt:/dev/zw/84/mod_siren/1/commands","push_cmd_local":"push_cmd_local"},
     "configs":{}
   },
   {
