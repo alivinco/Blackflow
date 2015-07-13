@@ -30,6 +30,7 @@ Application folder structure :
      dev_type (optional) - device type . Is used by configurator as topic generation helper .  
      descr    (optional) - description .  
 + configs - List of configurations needs to be set before an app can operate .
++ descr - Short description of the application.
 
 
 ### Simple app example : 
@@ -51,7 +52,7 @@ Application folder structure :
              
          def run(self,triggered_by):
          """
-          The method is invoked on every variable change (sub_for section in app config) 
+          The method is invoked every time variable from sub_for section is changed (sub_for section in app config) 
          """
              log.info("%s app was triggered by %s"%(self.name,triggered_by))
              situation = self.var_get(triggered_by)["event"]["default"]["value"]

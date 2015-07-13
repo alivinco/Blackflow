@@ -1,6 +1,6 @@
 {
     "name":"Pushnotificator",
-    "sub_for":{"push_msg":{"msg_type":"command.notification.push","topic":"mqtt:/app/bf_pushnotificator/commands","descr":"Command to send a message"},
+    "sub_for":{"push_msg":{"msg_type":"command.notification.push","adapter":"mqtt","topic":"mqtt:/app/bf_pushnotificator/commands","descr":"Command to send a message"},
                "push_msg_local":{}},
     "pub_to" :{},
     "configs":["api_key"]

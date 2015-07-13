@@ -3,7 +3,7 @@ import libs
 __author__ = 'alivinco'
 import logging
 from libs import msg_template
-log = logging.getLogger("bf_api_mqtt_handl")
+log = logging.getLogger(__name__)
 
 class ApiMqttHandler:
     sub_topic = "/app/blackflow/commands"
@@ -21,9 +21,9 @@ class ApiMqttHandler:
         self.mqtt_adapter.unsubscribe(self.sub_topic)
 
     def route(self,topic,msg):
-
         msg_subtype = msg["command"]["subtype"]
         msg_type = msg["command"]["@type"]
+        log.info("New blackflow api call type=%s subtype=%s"%(msg_type,msg_subtype))
 
         if msg_type == "blackflow":
             if msg_subtype == "reload_app" :
@@ -49,9 +49,15 @@ class ApiMqttHandler:
             elif msg_subtype == "delete_app_instance":
                 pass
             elif msg_subtype == "get_apps":
-                pass
+                msg = msg_template.generate_msg_template("blackflow","event","blackflow","apps")
+                msg["event"]["properties"] = {"apps":self.app_man.get_apps()}
+                self.mqtt_adapter.publish(self.pub_topic,msg)
+
             elif msg_subtype == "get_app_instances":
-                pass
+                msg = msg_template.generate_msg_template("blackflow","event","blackflow","app_instances")
+                msg["event"]["properties"] = {"app_instances":self.app_man.get_app_configs()}
+                self.mqtt_adapter.publish(self.pub_topic,msg)
+
             elif msg_subtype == "context_get":
                 msg = msg_template.generate_msg_template("blackflow","event","blackflow","context")
                 msg["event"]["properties"] = self.context.get_dict()
