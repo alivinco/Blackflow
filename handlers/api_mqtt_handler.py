@@ -43,7 +43,15 @@ class ApiMqttHandler:
                 src = msg["command"]["properties"]["src"]
 
             elif msg_subtype == "configure_app_instance":
-                pass
+                inst_id = msg["command"]["properties"]["id"]
+                app_name = msg["command"]["properties"]["name"]
+                app_name = msg["command"]["properties"]["alias"]
+                sub_for = msg["command"]["properties"]["sub_for"]
+                pub_to = msg["command"]["properties"]["pub_to"]
+                configs = msg["command"]["properties"]["configs"]
+                comments = msg["command"]["properties"]["comments"]
+                self.app_man.configure_app_instance(inst_id,app_name,sub_for,pub_to,configs,comments)
+
             elif msg_subtype == "delete_app":
                 pass
             elif msg_subtype == "delete_app_instance":
@@ -61,6 +69,11 @@ class ApiMqttHandler:
             elif msg_subtype == "context_get":
                 msg = msg_template.generate_msg_template("blackflow","event","blackflow","context")
                 msg["event"]["properties"] = self.context.get_dict()
+                self.mqtt_adapter.publish(self.pub_topic,msg)
+
+            elif msg_subtype == "analytics_get":
+                msg = msg_template.generate_msg_template("blackflow","event","blackflow","analytics")
+                msg["event"]["properties"] = {"link_counters":self.context.analytics.get_all_link_counters()}
                 self.mqtt_adapter.publish(self.pub_topic,msg)
 
             elif msg_subtype == "context_set":

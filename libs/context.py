@@ -4,6 +4,7 @@ import logging
 import os
 from threading import Lock
 import time
+from libs.analytics import AppAnalytics
 
 __author__ = 'alivinco'
 log = logging.getLogger("context")
@@ -13,6 +14,7 @@ class BfContext:
         self.context = {}
         self.write_lock = Lock()
         self.adapters = []
+        self.analytics = AppAnalytics()
 
     def on_context_change(self,var_name):
         """
@@ -34,7 +36,7 @@ class BfContext:
     def set(self, key, value, src_name=None, src_type="app"):
         """
         Context value setter
-        :param key: unique key
+        :param key: unique key , which in some cases is destination address .
         :param value: value
         :param src_name: reference to class which did the modification .
         :param src_type: param is needed to prevent infinite loops .
@@ -42,6 +44,8 @@ class BfContext:
         log.info("Context change key=%s , value=%s , mod_by=%s"%(key,value,src_name.name if src_name else ""))
         with self.write_lock:
             self.context[key] = {"value":value,"src_name":src_name.name if src_name else None,"src_type":src_type,"timestamp":time.time()}
+            if src_name:
+                self.analytics.tick_link_counter(src_name.name,key)
             self.on_context_change(key)
             if src_type == "app":
                 self.adapter_sync(key,value)

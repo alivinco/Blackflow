@@ -45,7 +45,7 @@ class BfApp:
         return self.context.get(name)
 
     def publish(self,name,value):
-        self.var_set(self.pub_to[name],value)
+        self.var_set(self.pub_to[name]["topic"],value)
 
     def config_get(self,name):
         return self.configs[name]

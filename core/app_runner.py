@@ -37,9 +37,10 @@ class AppRunner(Service):
                 continue
             log.debug("config app instance size %s"%len(self.configured_app_instances))
             for app in self.configured_app_instances:
-                if change_var_name in app.sub_for.values():
+                if len(filter(lambda item : change_var_name == item["topic"], app.sub_for.values()))>0:
                     try:
                             log.debug("Adding task to the queue for app = %s" % app.alias)
+                            self.context.analytics.tick_link_counter(change_var_name,app.alias)
                             self.app_execution_thread_pool.add_task(app.run,change_var_name)
                     except Exception as ex:
                         log.debug("App check method has failed with exception:")

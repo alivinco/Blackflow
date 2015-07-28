@@ -3,31 +3,31 @@
     "id":12,
     "name":"LightsControl",
     "alias":"LightControl_1",
-    "sub_for":{"motion_sensor":"mqtt:/dev/zw/75/bin_motion/1/events","light_sensor":"mqtt:/dev/zw/45/sen_luminance/1/events"},
-    "pub_to"  :{"switch":"mqtt:/dev/serial/99/bin_switch/commands"},
+    "sub_for":{"motion_sensor":{"topic":"mqtt:/dev/zw/75/bin_motion/1/events"},"light_sensor":{"topic":"mqtt:/dev/zw/45/sen_luminance/1/events"}},
+    "pub_to"  :{"switch":{"topic":"mqtt:/dev/serial/99/bin_switch/commands"}},
     "configs":{"param1":"value1"}
   },
    {
     "id":14,
     "name":"LightsControl",
     "alias":"LightControl_2",
-    "sub_for":{"motion_sensor":"mqtt:/dev/zw/100/bin_motion/1/events","light_sensor":"mqtt:/dev/zw/100/sen_luminance/1/events"},
-    "pub_to"  :{"switch":"mqtt:/dev/serial/99/bin_switch/commands"},
+    "sub_for":{"motion_sensor":{"topic":"mqtt:/dev/zw/100/bin_motion/1/events"},"light_sensor":{"topic":"mqtt:/dev/zw/100/sen_luminance/1/events"}},
+    "pub_to"  :{"switch":{"topic":"mqtt:/dev/serial/99/bin_switch/commands"}},
     "configs":{"param1":"value2"}
   },
   {
     "id":15,
     "name":"PullCordSirenApp",
     "alias":"PullCordSirenApp",
-    "sub_for":{"pull_cord":"mqtt:/dev/zw/87/mod_alarm/1/events","emergency_button":"mqtt:/dev/zw/90/mod_alarm/1/events"},
-    "pub_to"  :{"siren_control":"mqtt:/dev/zw/84/mod_siren/1/commands","push_cmd_local":"local:push_cmd_local"},
+    "sub_for":{"pull_cord":{"topic":"mqtt:/dev/zw/87/mod_alarm/1/events"},"emergency_button":{"topic":"mqtt:/dev/zw/90/mod_alarm/1/events"}},
+    "pub_to"  :{"siren_control":{"topic":"mqtt:/dev/zw/84/mod_siren/1/commands"},"push_cmd_local":{"topic":"local:push_cmd_local"}},
     "configs":{}
   },
   {
     "id":16,
     "name":"Pushnotificator",
     "alias":"Pushnotificator",
-    "sub_for":{"push_cmd":"mqtt:/app/bf_pushnotificator/commands","push_cmd_local":"local:push_cmd_local"},
+    "sub_for":{"push_cmd":{"topic":"mqtt:/app/bf_pushnotificator/commands"},"push_cmd_local":{"topic":"local:push_cmd_local"}},
     "pub_to"  :{},
     "configs":{"api_key":"hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2"}
   },
@@ -35,8 +35,8 @@
     "id":17,
     "name":"AlarmApp",
     "alias":"AlarmApp",
-    "sub_for":{"binary_event":"mqtt:/dev/zw/75/bin_motion/1/events"},
-    "pub_to" :{"push_notification":"local:push_cmd_local"},
+    "sub_for":{"binary_event":{"topic":"mqtt:/dev/zw/75/bin_motion/1/events"}},
+    "pub_to" :{"push_notification":{"topic":"local:push_cmd_local"}},
     "configs":{"alarm_state_timeout":60}
   }
 

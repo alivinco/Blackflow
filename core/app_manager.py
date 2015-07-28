@@ -1,4 +1,6 @@
 import sys
+from threading import Lock
+from libs.utils import get_next_id
 
 __author__ = 'alivinco'
 import importlib
@@ -17,6 +19,8 @@ class AppManager:
         self.app_configs = None
         self.context = context
         self.adapters = adapters
+        self.instances_config_file = file(os.path.join(self.apps_dir_path, "app_configs.json"))
+        self.instances_config_lock = Lock()
         # self.configure_and_init_app_instance()
         log.info("App init process completed. %s apps were initialized and configured " % len(self.configured_app_instances))
 
@@ -35,9 +39,14 @@ class AppManager:
     # def serialize_app_defs(self):
     #     with open(self.app_defs_path,"w") as f :
     #         f.write(json.dumps(self.app_descriptors, indent=True))
+    def serialize_instances_config(self):
+        log.info("Serializing instances config to file " + self.instances_config_file)
+        f = open(self.instances_config_file, "w")
+        f.write(json.dumps(self.instances_config_file, indent=True))
+        f.close()
 
     def load_app_configs(self):
-        self.app_configs = json.load(file(os.path.join(self.apps_dir_path, "app_configs.json")))
+        self.app_configs = json.load(self.instances_config_file)
 
     def load_app_descriptors(self):
         """
@@ -50,6 +59,25 @@ class AppManager:
             if item not in ("__init__.py","__init__.pyc"):
                 self.app_descriptors.append(json.load(file(os.path.join(self.apps_dir_path,'lib',item, item+".json"))))
                 print "%s"%(item)
+
+    def configure_app_instance(self,id,app_name,sub_for,pub_to,configs,comments):
+        with self.instances_config_lock:
+            inst_conf_list = filter(lambda conf : conf["id"]==id,self.app_configs)
+            if len(inst_conf_list==0):
+                inst_id = get_next_id(self.app_configs)
+                inst_conf = {"id": inst_id}
+                inst_conf["sub_for"] = sub_for
+                inst_conf["pub_to"] = pub_to
+                inst_conf["configs"] = configs
+                inst_conf["comments"] = comments
+                self.app_configs.append(inst_conf)
+            else:
+                inst_conf = inst_conf_list[0]
+                inst_conf["sub_for"] = sub_for
+                inst_conf["pub_to"] = pub_to
+                inst_conf["configs"] = configs
+                inst_conf["comments"] = comments
+            self.serialize_instances_config()
 
     def get_app_instances(self):
         return self.configured_app_instances
@@ -91,7 +119,7 @@ class AppManager:
             log.info("Unsubscribing from app's topics")
             for key, topic in ai.sub_for.iteritems():
                 for adapter in self.adapters:
-                    adapter.unsubscribe(topic)
+                    adapter.unsubscribe(topic["topic"])
             log.info("Deleting app instance")
             self.configured_app_instances.remove(ai)
             self.load_app_configs()
@@ -165,6 +193,6 @@ class AppManager:
                 # setting up subscriptions in adapters
                 for key, subsc in app_inst.sub_for.iteritems():
                     for adapter in self.adapters:
-                        adapter.subscribe(subsc)
+                        adapter.subscribe(subsc["topic"])
 
                 self.configured_app_instances.append(app_inst)
