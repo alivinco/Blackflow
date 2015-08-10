@@ -3,6 +3,6 @@
     "sub_for":{"pull_cord":{"adapter":"mqtt","msg_type":"event.alarm.situation","dev_type":"mod_alarm","descr":"Event from pull cord"}},
     "pub_to" :{"siren_control":{"adapter":"mqtt","msg_type":"command.mode.siren","dev_type":"mod_siren","descr":"Command to turn on siren"},
               "pull_cord_is_on":{"descr":"Pull cord state"},
-              "push_msg_local":{"msg_type":"command.notification.push","adapter":"local","topic":"local:push_msg_local"}},
+              "push_cmd_local":{"msg_type":"command.notification.push","adapter":"local","topic":"local:push_msg_local"}},
     "configs":[]
 }

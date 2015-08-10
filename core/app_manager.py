@@ -19,7 +19,7 @@ class AppManager:
         self.app_configs = None
         self.context = context
         self.adapters = adapters
-        self.instances_config_file = file(os.path.join(self.apps_dir_path, "app_configs.json"))
+        self.instances_config_file = os.path.join(self.apps_dir_path, "app_configs.json")
         self.instances_config_lock = Lock()
         # self.configure_and_init_app_instance()
         log.info("App init process completed. %s apps were initialized and configured " % len(self.configured_app_instances))
@@ -42,11 +42,11 @@ class AppManager:
     def serialize_instances_config(self):
         log.info("Serializing instances config to file " + self.instances_config_file)
         f = open(self.instances_config_file, "w")
-        f.write(json.dumps(self.instances_config_file, indent=True))
+        f.write(json.dumps(self.app_configs, indent=True))
         f.close()
 
     def load_app_configs(self):
-        self.app_configs = json.load(self.instances_config_file)
+        self.app_configs = json.load(file(self.instances_config_file))
 
     def load_app_descriptors(self):
         """
@@ -60,12 +60,14 @@ class AppManager:
                 self.app_descriptors.append(json.load(file(os.path.join(self.apps_dir_path,'lib',item, item+".json"))))
                 print "%s"%(item)
 
-    def configure_app_instance(self,id,app_name,sub_for,pub_to,configs,comments):
+    def configure_app_instance(self,id,app_name,alias,sub_for,pub_to,configs,comments):
         with self.instances_config_lock:
             inst_conf_list = filter(lambda conf : conf["id"]==id,self.app_configs)
-            if len(inst_conf_list==0):
+            if len(inst_conf_list)==0:
                 inst_id = get_next_id(self.app_configs)
                 inst_conf = {"id": inst_id}
+                inst_conf["name"] = app_name
+                inst_conf["alias"] = alias
                 inst_conf["sub_for"] = sub_for
                 inst_conf["pub_to"] = pub_to
                 inst_conf["configs"] = configs
@@ -73,11 +75,14 @@ class AppManager:
                 self.app_configs.append(inst_conf)
             else:
                 inst_conf = inst_conf_list[0]
+                inst_id = id
+                inst_conf["alias"] = alias
                 inst_conf["sub_for"] = sub_for
                 inst_conf["pub_to"] = pub_to
                 inst_conf["configs"] = configs
                 inst_conf["comments"] = comments
             self.serialize_instances_config()
+        return inst_id
 
     def get_app_instances(self):
         return self.configured_app_instances

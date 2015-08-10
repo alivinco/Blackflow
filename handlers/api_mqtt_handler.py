@@ -45,13 +45,13 @@ class ApiMqttHandler:
             elif msg_subtype == "configure_app_instance":
                 inst_id = msg["command"]["properties"]["id"]
                 app_name = msg["command"]["properties"]["name"]
-                app_name = msg["command"]["properties"]["alias"]
+                alias = msg["command"]["properties"]["alias"]
                 sub_for = msg["command"]["properties"]["sub_for"]
                 pub_to = msg["command"]["properties"]["pub_to"]
                 configs = msg["command"]["properties"]["configs"]
                 comments = msg["command"]["properties"]["comments"]
-                self.app_man.configure_app_instance(inst_id,app_name,sub_for,pub_to,configs,comments)
-
+                id = self.app_man.configure_app_instance(inst_id,app_name,alias,sub_for,pub_to,configs,comments)
+                self.app_man.reload_app_instance(id)
             elif msg_subtype == "delete_app":
                 pass
             elif msg_subtype == "delete_app_instance":
