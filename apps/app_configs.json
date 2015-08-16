@@ -1,7 +1,8 @@
 [
  {
   "name": "LightsControl", 
-  "alias": "LightControl_1", 
+  "alias": "LightControl_1",
+  "is_active":true,
   "id": 12, 
   "sub_for": {
    "light_sensor": {
@@ -22,7 +23,8 @@
  }, 
  {
   "name": "LightsControl", 
-  "alias": "LightControl_2", 
+  "alias": "LightControl_2",
+  "is_active":true,
   "id": 14, 
   "sub_for": {
    "light_sensor": {
@@ -44,8 +46,16 @@
  {
   "name": "PullCordSirenApp", 
   "alias": "PullCordSirenApp", 
-  "comments": "Pulcord app test", 
-  "id": 15, 
+  "comments": "Pulcord app test",
+  "is_active":true,
+  "pub_to": {
+   "siren_control": {
+    "topic": "mqtt:/dev/zw/84/mod_siren/1/commands"
+   }, 
+   "push_cmd_local": {
+    "topic": "local:push_cmd_local"
+   }
+  }, 
   "sub_for": {
    "emergency_button": {
     "topic": "mqtt:/dev/zw/90/mod_alarm/1/events"
@@ -55,20 +65,14 @@
    }
   }, 
   "configs": {}, 
-  "pub_to": {
-   "siren_control": {
-    "topic": "mqtt:/dev/zw/84/mod_siren/1/commands"
-   }, 
-   "push_cmd_local": {
-    "topic": "local:push_cmd_local"
-   }
-  }
+  "id": 15
  }, 
  {
   "name": "Pushnotificator", 
-  "alias": "Pushnotificator", 
+  "alias": "Pushnotificator",
+  "is_active":true,
   "comments": "", 
-  "pub_to": {}, 
+  "id": 16, 
   "sub_for": {
    "push_cmd": {
     "topic": "mqtt:/app/bf_pushnotificator/commands"
@@ -80,17 +84,14 @@
   "configs": {
    "api_key": "hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2"
   }, 
-  "id": 16
+  "pub_to": {}
  }, 
  {
   "name": "AlarmApp", 
-  "alias": "AlarmApp", 
+  "alias": "AlarmApp",
+  "is_active":true,
   "comments": "q", 
-  "pub_to": {
-   "push_notification": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
+  "id": 17, 
   "sub_for": {
    "binary_event": {
     "topic": "mqtt:/dev/zw/75/bin_motion/1/events"
@@ -99,17 +100,18 @@
   "configs": {
    "alarm_state_timeout": 60
   }, 
-  "id": 17
+  "pub_to": {
+   "push_notification": {
+    "topic": "local:push_cmd_local"
+   }
+  }
  }, 
  {
   "name": "LightsControl", 
-  "alias": "LightsControl3", 
+  "alias": "LightsControl3",
+  "is_active":true,
   "comments": "test", 
-  "pub_to": {
-   "switch": {
-    "topic": "mqtt:/dev/zw/120/bin_switch/1/events"
-   }
-  }, 
+  "id": 18, 
   "sub_for": {
    "light_sensor": {
     "topic": "mqtt:/dev/zw/100/sen_luminance/1/events"
@@ -121,6 +123,29 @@
   "configs": {
    "param1": ""
   }, 
-  "id": 18
+  "pub_to": {
+   "switch": {
+    "topic": "mqtt:/dev/zw/120/bin_switch/1/events"
+   }
+  }
+ }, 
+ {
+  "name": "ServoCam", 
+  "alias": "ServoCam", 
+  "comments": "Servo control through arduino",
+  "is_active":false,
+  "id": 19, 
+  "sub_for": {
+   "servo_command_local": {
+    "topic": "local:servocam"
+   }, 
+   "servo_command_msg": {
+    "topic": "mqtt:/app/servocam/commands"
+   }
+  }, 
+  "configs": {
+   "api_key": ""
+  }, 
+  "pub_to": {}
  }
 ]

@@ -1,5 +1,6 @@
+import os
 import libs
-
+import base64
 __author__ = 'alivinco'
 import logging
 from libs import msg_template
@@ -78,6 +79,31 @@ class ApiMqttHandler:
 
             elif msg_subtype == "context_set":
                 pass
+            elif msg_subtype == "download_app":
+                app_name = msg["command"]["default"]["value"]
+            elif msg_subtype == "upload_app":
+                pass
+
+        elif msg_type == "file":
+            if msg_subtype == "download":
+                # absolute path to app directory
+                file_name = msg["command"]["default"]["value"]
+                full_path = os.path.join(self.app_man.apps_dir_path,"lib",file_name)
+                with open(full_path, "rb") as app_file:
+                    bin_data = base64.b64encode(app_file.read())
+                msg = msg_template.generate_msg_template("blackflow","event","file","download",msg)
+                msg["event"]["default"]["value"] = file_name
+                msg["event"]["properties"]["bin_data"] = bin_data
+                print msg
+                self.mqtt_adapter.publish(self.pub_topic,msg)
+
+            if msg_subtype == "upload":
+                name = msg["command"]["properties"]["name"]
+                type = msg["command"]["properties"]["type"]
+                path = msg["command"]["properties"]["path"]
+                data = msg["command"]["properties"]["data"]
+
+
 
         elif msg_type == "config":
             if msg_subtype == "set" :
