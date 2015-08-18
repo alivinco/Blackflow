@@ -1,8 +1,8 @@
 [
  {
   "name": "LightsControl", 
-  "alias": "LightControl_1",
-  "is_active":true,
+  "alias": "LightControl_1", 
+  "is_active": true, 
   "id": 12, 
   "sub_for": {
    "light_sensor": {
@@ -23,8 +23,8 @@
  }, 
  {
   "name": "LightsControl", 
-  "alias": "LightControl_2",
-  "is_active":true,
+  "alias": "LightControl_2", 
+  "is_active": true, 
   "id": 14, 
   "sub_for": {
    "light_sensor": {
@@ -46,8 +46,8 @@
  {
   "name": "PullCordSirenApp", 
   "alias": "PullCordSirenApp", 
-  "comments": "Pulcord app test",
-  "is_active":true,
+  "is_active": true, 
+  "comments": "Pulcord app test", 
   "pub_to": {
    "siren_control": {
     "topic": "mqtt:/dev/zw/84/mod_siren/1/commands"
@@ -69,8 +69,8 @@
  }, 
  {
   "name": "Pushnotificator", 
-  "alias": "Pushnotificator",
-  "is_active":true,
+  "alias": "Pushnotificator", 
+  "is_active": true, 
   "comments": "", 
   "id": 16, 
   "sub_for": {
@@ -82,14 +82,16 @@
    }
   }, 
   "configs": {
-   "api_key": "hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2"
+   "pushover_app_token": "ap2d7Ru4y1hYJJw1zzP3MnZMGqzwx6", 
+   "pushbullet_api_key": "hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2", 
+   "pushover_client_id": "uFMfKKZTvx9Phh8ctzRzUHUyYYwGtX"
   }, 
   "pub_to": {}
  }, 
  {
   "name": "AlarmApp", 
-  "alias": "AlarmApp",
-  "is_active":true,
+  "alias": "AlarmApp", 
+  "is_active": true, 
   "comments": "q", 
   "id": 17, 
   "sub_for": {
@@ -107,33 +109,10 @@
   }
  }, 
  {
-  "name": "LightsControl", 
-  "alias": "LightsControl3",
-  "is_active":true,
-  "comments": "test", 
-  "id": 18, 
-  "sub_for": {
-   "light_sensor": {
-    "topic": "mqtt:/dev/zw/100/sen_luminance/1/events"
-   }, 
-   "motion_sensor": {
-    "topic": "mqtt:/dev/zw/101/sen_motion/1/events"
-   }
-  }, 
-  "configs": {
-   "param1": ""
-  }, 
-  "pub_to": {
-   "switch": {
-    "topic": "mqtt:/dev/zw/120/bin_switch/1/events"
-   }
-  }
- }, 
- {
   "name": "ServoCam", 
   "alias": "ServoCam", 
-  "comments": "Servo control through arduino",
-  "is_active":false,
+  "is_active": false, 
+  "comments": "Servo control through arduino", 
   "id": 19, 
   "sub_for": {
    "servo_command_local": {

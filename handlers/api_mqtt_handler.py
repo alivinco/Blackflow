@@ -28,7 +28,12 @@ class ApiMqttHandler:
 
         if msg_type == "blackflow":
             if msg_subtype == "reload_app" :
-               self.app_man.reload_app(msg["command"]["default"]["value"])
+               success,error = self.app_man.reload_app(msg["command"]["default"]["value"])
+               msg = msg_template.generate_msg_template("blackflow","event","blackflow","reload_app",msg)
+               msg["event"]["properties"] = {"error":error}
+               msg["event"]["default"]["value"] = success
+               self.mqtt_adapter.publish(self.pub_topic,msg)
+
             if msg_subtype == "load_new_app" :
                self.app_man.load_new_app(msg["command"]["default"]["value"])
 
@@ -94,16 +99,16 @@ class ApiMqttHandler:
                 msg = msg_template.generate_msg_template("blackflow","event","file","download",msg)
                 msg["event"]["default"]["value"] = file_name
                 msg["event"]["properties"]["bin_data"] = bin_data
-                print msg
                 self.mqtt_adapter.publish(self.pub_topic,msg)
 
             if msg_subtype == "upload":
                 name = msg["command"]["properties"]["name"]
                 type = msg["command"]["properties"]["type"]
-                path = msg["command"]["properties"]["path"]
-                data = msg["command"]["properties"]["data"]
-
-
+                data = msg["command"]["properties"]["bin_data"]
+                full_path = os.path.join(self.app_man.apps_dir_path,"lib",name)
+                bin_data = base64.b64decode(data)
+                with open(full_path, "wb") as app_file:
+                    app_file.write(bin_data)
 
         elif msg_type == "config":
             if msg_subtype == "set" :

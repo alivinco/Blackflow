@@ -163,6 +163,7 @@ class AppManager:
             reload_success = True
         except Exception as ex:
             log.exception(ex)
+            error = str(ex)
             #TODO: Send notification via API
 
         if reload_success:
@@ -172,6 +173,9 @@ class AppManager:
             apps = filter(lambda app_conf:app_conf["name"]==app_name,self.app_configs)
             for app in apps:
                 self.reload_app_instance(app["id"],app_name)
+            return True, None
+        else :
+            return False, error
 
     def load_app_classes(self):
         """

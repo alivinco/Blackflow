@@ -14,8 +14,8 @@ class LightsControl(BfApp):
             self.publish("switch", self.lights_control())
             log.info("Actionnnn by %s"%self.alias)
         else :
-            log.info("Lights are already ON ")
-
+            log.info("Lights are already ON test3")
+        
     def lights_control(self,state):
         return {
                      "origin": {
