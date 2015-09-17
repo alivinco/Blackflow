@@ -11,15 +11,15 @@ log = logging.getLogger("mqtt_adapter")
 class MqttAdapter(Adapter):
     adapter_prefix = "mqtt:"
 
-    def __init__(self, context, client_id="blackflow"):
+    def __init__(self, context,instance_name, client_id="blackflow",host="localhost",port=1883):
         super(MqttAdapter, self).__init__(context, "MqttAdapter")
         self.mqtt = mqtt.Client(client_id=client_id, clean_session=True)
         self.mqtt.on_message = self.on_message
-        self.hostname = "localhost"
-        self.port = 1883
+        self.hostname = host
+        self.port = port
         self.api_handler = None
-        self.api_sub = "/app/blackflow/commands"
-        self.api_pub = "/app/blackflow/events"
+        self.api_sub = "/app/blackflow/%s/commands"%instance_name
+        self.api_pub = "/app/blackflow/%s/events"%instance_name
 
     def set_connection_params(self, hostname, port=1883):
         self.hostname = hostname

@@ -41,7 +41,6 @@ class ContextStorage():
 # The class is singleton and is responsible for creation and tracking instances
 class FlowManager():
 
-
     def __init__(self,msg_transport):
         # Table contains flow metadata
         self.flow_table = []

@@ -9,7 +9,7 @@ from pushbullet import PushBullet
 class Pushnotificator(BfApp):
     name = __name__
 
-    def init_app(self):
+    def on_start(self):
         init(self.config_get("pushover_app_token"))
 
     def run(self,triggered_by):

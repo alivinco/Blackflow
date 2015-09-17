@@ -20,7 +20,7 @@ class AppRunner(Service):
         self.adapters = adapters
 
     def initialize(self):
-        log.info("***Initializing configured_app_instances runner service....")
+        log.info("***Initializing app_instances runner service....")
 
     def on_context_change(self, var_name):
         """

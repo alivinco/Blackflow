@@ -1,3 +1,5 @@
+import json
+
 __author__ = 'alivinco'
 import sys
 sys.path.append("./libs/site-packages")
@@ -19,18 +21,21 @@ def sigterm_handler(signum, frame):
         service_manager.stop()
 
 if __name__ == "__main__":
+    with open("configs/blackflow_config.json", "r") as app_file:
+                    configs = json.loads(app_file.read())
+    instance_name = configs["instance_config"]["name"]
     service_manager = ServiceManager("main")
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
     adapters = []
-    log.info("Starting application")
+    log.info("Starting application.Blackflow instance name = %s"%instance_name)
     context = BfContext()
 
-    mqtt_adapter_service = MqttAdapter(context)
+    mqtt_adapter_service = MqttAdapter(context,instance_name,client_id=instance_name,host=configs["mqtt"]["host"],port=configs["mqtt"]["port"])
     adapters.append(mqtt_adapter_service)
     app_manager = AppManager(context,adapters)
     rule_runner_service = AppRunner(context,adapters,app_manager)
-    api_mqtt_handler = ApiMqttHandler(app_manager,mqtt_adapter_service,context)
+    api_mqtt_handler = ApiMqttHandler(app_manager,mqtt_adapter_service,context,instance_name)
     mqtt_adapter_service.set_api_handler(api_mqtt_handler)
 
     service_manager.register(rule_runner_service)

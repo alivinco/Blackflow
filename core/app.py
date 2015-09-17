@@ -7,6 +7,8 @@ __author__ = 'alivinco'
 mqtt messages becomes key value pare
 {"/dev/zw/75/bin_motion/1/events":{}}
 
+
+
 """
 
 log = logging.getLogger("bf_rule")
@@ -27,7 +29,16 @@ class BfApp:
     def get_id(self):
         return self.id
 
-    def init_app(self):
+    def on_start(self):
+        """
+        Invoked by app manager on app startup. Initialize app level variables here.
+        """
+        pass
+
+    def on_stop(self):
+        """
+        Invoked by app manager on app shutdown. Destroy app level variables here.
+        """
         pass
 
     def run(self,triggered_by):

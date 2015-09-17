@@ -7,7 +7,7 @@ import pyfirmata
 
 class ServoCam(BfApp):
     name = __name__
-    def init_app(self):
+    def on_start(self):
         """
 
         """

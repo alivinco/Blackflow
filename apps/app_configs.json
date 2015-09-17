@@ -2,8 +2,11 @@
  {
   "name": "LightsControl", 
   "alias": "LightControl_1", 
-  "is_active": true, 
-  "id": 12, 
+  "pub_to": {
+   "switch": {
+    "topic": "mqtt:/dev/serial/99/bin_switch/commands"
+   }
+  }, 
   "sub_for": {
    "light_sensor": {
     "topic": "mqtt:/dev/zw/45/sen_luminance/1/events"
@@ -12,20 +15,21 @@
     "topic": "mqtt:/dev/zw/75/bin_motion/1/events"
    }
   }, 
+  "state": 3, 
   "configs": {
    "param1": "value1"
   }, 
-  "pub_to": {
-   "switch": {
-    "topic": "mqtt:/dev/serial/99/bin_switch/commands"
-   }
-  }
+  "id": 12, 
+  "auto_startup": "RUN"
  }, 
  {
   "name": "LightsControl", 
   "alias": "LightControl_2", 
-  "is_active": true, 
-  "id": 14, 
+  "pub_to": {
+   "switch": {
+    "topic": "mqtt:/dev/serial/99/bin_switch/commands"
+   }
+  }, 
   "sub_for": {
    "light_sensor": {
     "topic": "mqtt:/dev/zw/100/sen_luminance/1/events"
@@ -34,28 +38,18 @@
     "topic": "mqtt:/dev/zw/100/bin_motion/1/events"
    }
   }, 
+  "state": 3, 
   "configs": {
    "param1": "value2"
   }, 
-  "pub_to": {
-   "switch": {
-    "topic": "mqtt:/dev/serial/99/bin_switch/commands"
-   }
-  }
+  "id": 14, 
+  "auto_startup": "RUN"
  }, 
  {
   "name": "PullCordSirenApp", 
   "alias": "PullCordSirenApp", 
-  "is_active": true, 
   "comments": "Pulcord app test", 
-  "pub_to": {
-   "siren_control": {
-    "topic": "mqtt:/dev/zw/84/mod_siren/1/commands"
-   }, 
-   "push_cmd_local": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
+  "id": 15, 
   "sub_for": {
    "emergency_button": {
     "topic": "mqtt:/dev/zw/90/mod_alarm/1/events"
@@ -64,15 +58,23 @@
     "topic": "mqtt:/dev/zw/87/mod_alarm/1/events"
    }
   }, 
+  "state": 3, 
   "configs": {}, 
-  "id": 15
+  "pub_to": {
+   "siren_control": {
+    "topic": "mqtt:/dev/zw/84/mod_siren/1/commands"
+   }, 
+   "push_cmd_local": {
+    "topic": "local:push_cmd_local"
+   }
+  }, 
+  "auto_startup": "RUN"
  }, 
  {
   "name": "Pushnotificator", 
   "alias": "Pushnotificator", 
-  "is_active": true, 
   "comments": "", 
-  "id": 16, 
+  "pub_to": {}, 
   "sub_for": {
    "push_cmd": {
     "topic": "mqtt:/app/bf_pushnotificator/commands"
@@ -81,50 +83,107 @@
     "topic": "local:push_cmd_local"
    }
   }, 
+  "state": 3, 
   "configs": {
    "pushover_app_token": "ap2d7Ru4y1hYJJw1zzP3MnZMGqzwx6", 
    "pushbullet_api_key": "hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2", 
    "pushover_client_id": "uFMfKKZTvx9Phh8ctzRzUHUyYYwGtX"
   }, 
-  "pub_to": {}
+  "id": 16, 
+  "auto_startup": "RUN"
  }, 
  {
   "name": "AlarmApp", 
   "alias": "AlarmApp", 
-  "is_active": true, 
   "comments": "q", 
-  "id": 17, 
+  "pub_to": {
+   "push_notification": {
+    "topic": "local:push_cmd_local"
+   }
+  }, 
   "sub_for": {
    "binary_event": {
     "topic": "mqtt:/dev/zw/75/bin_motion/1/events"
    }
   }, 
+  "state": 3, 
   "configs": {
    "alarm_state_timeout": 60
   }, 
-  "pub_to": {
-   "push_notification": {
-    "topic": "local:push_cmd_local"
-   }
-  }
+  "id": 17, 
+  "auto_startup": "RUN"
  }, 
  {
   "name": "ServoCam", 
   "alias": "ServoCam", 
-  "is_active": false, 
   "comments": "Servo control through arduino", 
-  "id": 19, 
+  "pub_to": {}, 
   "sub_for": {
-   "servo_command_local": {
-    "topic": "local:servocam"
-   }, 
    "servo_command_msg": {
     "topic": "mqtt:/app/servocam/commands"
+   }, 
+   "servo_command_local": {
+    "topic": "local:servocam"
    }
   }, 
+  "state": 3, 
+  "error": "[Errno 2] No such file or directory: '/dev/cu.usbmodem1411'", 
   "configs": {
    "api_key": ""
   }, 
-  "pub_to": {}
+  "id": 19, 
+  "auto_startup": "STOP"
+ }, 
+ {
+  "name": "FlowerWatering", 
+  "alias": "WateringPump1", 
+  "comments": "", 
+  "id": 20, 
+  "sub_for": {
+   "start_msg": {
+    "topic": "mqtt:/app/bf_watering_pump_1/commands"
+   }
+  }, 
+  "state": 3, 
+  "configs": {
+   "pump_on_duration": "4"
+  }, 
+  "pub_to": {
+   "watering_status": {
+    "topic": "local:watering_status_pump_1"
+   }, 
+   "pump_control_msg": {
+    "topic": "mqtt:/dev/zw/4/bin_switch/1/commands"
+   }
+  }, 
+  "auto_startup": "RUN"
+ }, 
+ {
+  "name": "DoorLock", 
+  "alias": "DoorLock1", 
+  "comments": "", 
+  "id": 21, 
+  "sub_for": {
+   "lock_events": {
+    "topic": "mqtt:/dev/zw/13/bin_lock/1/events"
+   }, 
+   "zw_ta": {
+    "topic": "mqtt:/ta/zw/events"
+   }, 
+   "pull_cord": {
+    "topic": "mqtt:/dev/zw/13/bin_switch/1/commands"
+   }
+  }, 
+  "state": 0, 
+  "configs": {}, 
+  "pub_to": {
+   "lock_control": {
+    "topic": "mqtt:/dev/zw/13/bin_lock/1/commands"
+   }, 
+   "switch_events": {
+    "topic": "mqtt:/dev/zw/13/bin_switch/1/events"
+   }
+  }, 
+  "auto_startup": "RUN"
  }
 ]

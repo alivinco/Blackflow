@@ -32,6 +32,24 @@ Application folder structure :
 + configs - List of configurations needs to be set before an app can operate .
 + descr - Short description of the application.
 
+#### App lifecycle :
+
++ App states :     
+     STOPPED - application instance is stopped . Application classes and artifacts are not loaded .    
+     LOADED - application classes are loaded .     
+     INITIALIZED - application successfully initialize and ready to process messages .   
+     RUNNING - application instance is running and processing messages .    
+     PAUSED - application instance is loaded and is initialized but not processing messages .     
+     STOPPED_WITH_ERROR - application stopped with error .     
+     PAUSED_WITH_ERROR - application paused with error .    
+      
++ Normal startup flow : STOPPED - > LOADED -> INITIALIZED -> RUNNING
++ Class or artifact loading error flow : STOPPED -> (class loading or artifact loading error) -> STOPPED_WITH_ERROR
++ Initialization failure flow : STOPPED -> LOADED -> (error during initialization) -> STOPPED_WITH_ERROR
++ Non recoverable error during runtime , the same error repeats more then X times in a row : STOPPED ->LOADED -> INITIALIZED -> RUNNING -> (non recoverable error) -> PAUSED_WITH_ERROR
++ User can send RUN , STOP  , PAUSE commands .
++ Each application instance has auto_startup parameter with can take value RUN , STOP , PAUSE
+
 
 ### Simple app example : 
 
@@ -44,12 +62,16 @@ Application folder structure :
     class PullCordSirenApp(BfApp):
          name = "PullCordSirenApp"
          
-         def init_app(self):
+         def on_start(self):
          """
            The method is invoked once during app startup . Init all variables here 
          """
              self.var_set("is_alarms_situation", False )
-             
+         
+         def on_stop():
+         """
+           The method is invoked during app shutdown . Do all cleanup work here  
+         """    
          def run(self,triggered_by):
          """
           The method is invoked every time variable from sub_for section is changed (sub_for section in app config) 

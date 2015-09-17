@@ -7,10 +7,11 @@ from libs import msg_template
 log = logging.getLogger(__name__)
 
 class ApiMqttHandler:
-    sub_topic = "/app/blackflow/commands"
-    pub_topic = "/app/blackflow/events"
 
-    def __init__(self,app_manager,mqtt_adapter,context):
+
+    def __init__(self,app_manager,mqtt_adapter,context,instance_name):
+        self.sub_topic = "/app/blackflow/%s/commands"%instance_name
+        self.pub_topic = "/app/blackflow/%s/events"%instance_name
         self.app_man = app_manager
         self.mqtt_adapter = mqtt_adapter
         self.context = context
@@ -39,6 +40,11 @@ class ApiMqttHandler:
 
             elif msg_subtype == "reload_app_instance":
                self.app_man.reload_app_instance(msg["command"]["default"]["value"])
+               msg = msg_template.generate_msg_template("blackflow","event","blackflow","reload_app_instance",msg)
+               msg["event"]["properties"] = {"error":""}
+               msg["event"]["default"]["value"] = True
+               self.mqtt_adapter.publish(self.pub_topic,msg)
+
             elif msg_subtype == "control_app":
                 pass
             elif msg_subtype == "add_app":

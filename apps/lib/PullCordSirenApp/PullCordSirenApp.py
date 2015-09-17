@@ -5,8 +5,8 @@ from core.app import BfApp
 log = logging.getLogger("PullCordSirenApp")
 
 class PullCordSirenApp(BfApp):
-    name = "PullCordSirenApp"
-    def init_app(self):
+    name = __name__
+    def on_start(self):
         self.is_alarms_situation = False
 
     def run(self,triggered_by):
@@ -25,6 +25,7 @@ class PullCordSirenApp(BfApp):
         msg = generate_msg_template(self.name,"command","mode","siren")
         msg["command"]["default"]["value"] = state
         return msg
+
 
 
 
