@@ -1,6 +1,6 @@
 import logging
-from libs.msg_template import generate_msg_template
-from core.app import BfApp
+from blackflow.libs.msg_template import generate_msg_template
+from blackflow.core.app import BfApp
 
 log = logging.getLogger("PullCordSirenApp")
 

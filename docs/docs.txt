@@ -1,0 +1,4 @@
+Linux installation layout .
+/etc/blackflow/ - configs goes here
+/usr/lib/blackflow - entire blackflow framework goes here
+/var/blackflow/apps - all apps should be installed here

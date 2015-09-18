@@ -19,8 +19,8 @@ class AppManager:
     STOPPED_WITH_ERROR = 5
     PAUSED_WITH_ERROR = 6
 
-    def __init__(self, context, adapters):
-        self.apps_dir_path = "apps"
+    def __init__(self, context, adapters,apps_dir_path):
+        self.apps_dir_path = apps_dir_path
         self.app_instances = []
         self.app_classes = {}
         self.app_descriptors = None

@@ -5,15 +5,16 @@ import sys
 sys.path.append("./libs/site-packages")
 import signal
 import time
-from libs.context import BfContext
-from adapters.mqtt_adapter import MqttAdapter
-from core.app_manager import AppManager
-from core.app_runner import AppRunner
-from handlers.api_mqtt_handler import ApiMqttHandler
+import argparse
+from blackflow.libs.context import BfContext
+from blackflow.adapters.mqtt_adapter import MqttAdapter
+from blackflow.core.app_manager import AppManager
+from blackflow.core.app_runner import AppRunner
+from blackflow.handlers.api_mqtt_handler import ApiMqttHandler
 from smartlylib.service.Service import ServiceManager, ServiceState
 import logging, logging.config
-import configs.log
-logging.config.dictConfig(configs.log.config)
+import blackflow.configs.log
+logging.config.dictConfig(blackflow.configs.log.config)
 log = logging.getLogger("bf_rules_runner")
 
 def sigterm_handler(signum, frame):
@@ -21,9 +22,14 @@ def sigterm_handler(signum, frame):
         service_manager.stop()
 
 if __name__ == "__main__":
-    with open("configs/blackflow_config.json", "r") as app_file:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c','--conf', help='Config file path')
+    parser.add_argument('-a','--apps', help='Folder to store apps')
+    args = parser.parse_args()
+    with open(args.conf, "r") as app_file:
                     configs = json.loads(app_file.read())
     instance_name = configs["instance_config"]["name"]
+
     service_manager = ServiceManager("main")
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
@@ -33,7 +39,7 @@ if __name__ == "__main__":
 
     mqtt_adapter_service = MqttAdapter(context,instance_name,client_id=instance_name,host=configs["mqtt"]["host"],port=configs["mqtt"]["port"])
     adapters.append(mqtt_adapter_service)
-    app_manager = AppManager(context,adapters)
+    app_manager = AppManager(context,adapters,args.apps)
     rule_runner_service = AppRunner(context,adapters,app_manager)
     api_mqtt_handler = ApiMqttHandler(app_manager,mqtt_adapter_service,context,instance_name)
     mqtt_adapter_service.set_api_handler(api_mqtt_handler)

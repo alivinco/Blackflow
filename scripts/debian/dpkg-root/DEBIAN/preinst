@@ -1,0 +1,80 @@
+#!/bin/bash
+###################################################################################
+# DISCLAIMER:
+# Since the SGWs are not flashed prior to first use (as of 2015-04-14),
+# flashing of the Z-Wave chip must be handled by ZWTA - otherwise the TA will never
+# be able to start. Therefore, flashing of the Z-Wave chip has been added as a
+# pre-installation step to ZWTA.
+#
+# This is NOT an optimal approach, but has to be done in order for the TA to work,
+# since this is not handled elsewhere.
+#
+# Any comments or questions regarding this can be directed to
+# Morten Aasbak <morten.aasbak@lyse.no>
+###################################################################################
+
+function export_gpio {
+    if [ ! -f /sys/class/gpio/gpio132/value ]; then
+        echo 132 > /sys/class/gpio/export
+    fi
+    return 0
+}
+
+function zwave_reset {
+    export_gpio
+    echo 0 > /sys/class/gpio/gpio132/value
+    sleep 1
+    echo 1 > /sys/class/gpio/gpio132/value
+    sleep 1
+    echo "Z-Wave module has been reset"
+    return 0
+}
+
+#########################
+# FLASH THE Z-WAVE CHIP #
+#########################
+zw_log_file="/var/log/zw_flasher.log"
+export PATH=$PATH:/usr/local/bin
+# export DEBIAN_FRONTEND=noninteractive
+
+# Export GPIO
+export_gpio
+
+# Get home ID from EEPROM
+home_id=$(/usr/local/bin/zwFlasher -h | tail -n 2 | rev | cut -d'.' -f 1 | rev | tr -d ' ' | sed -e 's/0x//g' | tr '[:upper:]' '[:lower:]')
+
+# Get CPU serial
+cpu_serial=$(cat /proc/cpuinfo | grep -i "^serial" | cut -f 3 | cut -c 3-)
+
+# If the home ID does not match the first characters of the CPU serial, flash the Z-Wave module
+if [[ "${cpu_serial}" != "${home_id}"* ]]; then
+    echo "Starting Flashing of Z-Wave module, output stored in $zw_log_file."
+    echo "Flashing will take approx. 1-10 minutes, please be patient!"
+    # Remove old logs
+    if [ -f ${zw_log_file} ]; then
+        rm ${zw_log_file}
+    fi
+
+    # install zwave firmware image & zwave eeprom image
+    eval "/usr/local/bin/zwFlasher -a all" >> ${zw_log_file} 2>&1
+    #check zwFlasher response
+    if [ $? -eq 0 ];then
+        # Setting Home ID as lower 4 bytes of CPU Id
+        echo "Setting Home Id..."
+        eval "/usr/local/bin/zwFlasher -H 0" >> ${zw_log_file} 2>&1
+        echo "Successfully flashed Z-Wave firmware"
+    else
+        echo "Failed to flash Z-Wave firmware" > /dev/stderr
+        return 1
+    fi
+
+else
+    echo "Skipping flashing of Z-Wave binary. Home ID = ${home_id}"
+fi
+
+#########################
+# RESET THE Z-WAVE CHIP #
+#########################
+zwave_reset
+
+exit 0

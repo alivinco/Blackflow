@@ -21,6 +21,7 @@ setup(name        = 'Blackflow',
       description = 'Reactive apps execution runtime environment',
       author      = 'Aleksandrs Livincovs',
       author_email= 'aleksandrs.livincovs@gmail.com',
-      package_dir = {'': './'},
-      packages    = find_packages('./')
+      packages    = find_packages(exclude=['apps*','tests']),
+      scripts     = ['blackflow/blackflow_service.py'],
+      package_data = {'':['*.json']}
      )

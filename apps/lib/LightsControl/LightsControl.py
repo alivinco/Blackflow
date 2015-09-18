@@ -1,5 +1,5 @@
 import logging
-from core.app import BfApp
+from blackflow.core.app import BfApp
 
 log = logging.getLogger("LightsControl")
 
