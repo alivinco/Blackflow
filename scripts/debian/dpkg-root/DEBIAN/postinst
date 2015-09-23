@@ -1,11 +1,8 @@
 #!/bin/sh
-APP=zwta
-
-# Compile python sources
-python -m compileall /usr/lib/lyse_services/${APP}/bin || :
+APP=blackflow
 
 # Create directory
-mkdir -p /media/app/${APP} 2>/dev/null || :
+mkdir -p /var/blackflow/apps 2>/dev/null || :
 
 # Install service
 update-rc.d -f ${APP} remove

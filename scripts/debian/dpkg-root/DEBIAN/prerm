@@ -1,9 +1,9 @@
 #!/bin/sh
-APP=zwta
+APP=blackflow
 
 service ${APP} stop
 
 if [ "$1" = "remove" ]; then
-find /usr/lib/lyse_services/${APP} | grep "\.pyc$" | xargs rm
+find /usr/lib/${APP} | grep "\.pyc$" | xargs rm
 update-rc.d -f ${APP} remove
 fi

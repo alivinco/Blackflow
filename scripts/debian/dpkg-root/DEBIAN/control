@@ -1,13 +1,12 @@
-Package: smartly-zwave-ta
+Package: blackflow
 Version: ###@VERSION@###
-Maintainer: Lyse Smart AS <webmaster@smartly.no>
+Maintainer: Aleksandrs Livincovs <aleksandrs.livincovs@gmail.com>
 Architecture: all
-Depends: smartlylib-python (>=1.3.4~beta5), python (>=2.7), python-serial (>=2.5), zwFlasher (>=1.0.0~beta1), python-crypto (>=2.6.1)
-Build-Depends: smartlylib-python (>=1.2.1~beta1)
-Build-Depends-Indep: smartlylib-python (>=1.2.1~beta1)
-Replaces: zwave-ta, zwave-config
-Conflicts: zwave-ta, zwave-config
-Description: Z-Wave Technology Adapter
- Converts messages to/from devices between MQTT/JSON and Z-Wave
+Depends: python (>=2.7)
+Build-Depends:
+Build-Depends-Indep:
+Replaces:
+Conflicts:
+Description: Blackflow reactive application framework
 Section: comm
 Priority: standard

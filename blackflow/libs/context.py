@@ -4,7 +4,7 @@ import logging
 import os
 from threading import Lock
 import time
-from libs.analytics import AppAnalytics
+from blackflow.libs.analytics import AppAnalytics
 
 __author__ = 'alivinco'
 log = logging.getLogger("context")

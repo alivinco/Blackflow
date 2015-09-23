@@ -2,7 +2,7 @@ import json
 
 __author__ = 'alivinco'
 import sys
-sys.path.append("./libs/site-packages")
+sys.path.append("./blackflow/libs/site-packages")
 import signal
 import time
 import argparse
