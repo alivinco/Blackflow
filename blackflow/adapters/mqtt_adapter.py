@@ -1,7 +1,7 @@
 __author__ = 'alivinco'
 import json
 import logging
-from adapters.adapter import Adapter
+from adapter import Adapter
 
 import paho.mqtt.client as mqtt
 

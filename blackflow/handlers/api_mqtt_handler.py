@@ -1,9 +1,8 @@
 import os
-import libs
 import base64
 __author__ = 'alivinco'
 import logging
-from libs import msg_template
+from blackflow.libs import msg_template
 log = logging.getLogger(__name__)
 
 class ApiMqttHandler:

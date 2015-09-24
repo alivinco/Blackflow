@@ -1,6 +1,6 @@
 import sys
 from threading import Lock
-from libs.utils import get_next_id
+from blackflow.libs.utils import get_next_id
 
 __author__ = 'alivinco'
 import importlib
@@ -209,10 +209,13 @@ class AppManager:
 
         """
         for app_def in self.app_descriptors:
-            imp_mod = importlib.import_module("apps.lib.%s.%s"%(app_def["name"],app_def["name"]))
-            app_class = getattr(imp_mod, app_def["name"])
-            app_class.context = self.context
-            self.app_classes[app_def["name"]] = app_class
+            try:
+                imp_mod = importlib.import_module("apps.lib.%s.%s"%(app_def["name"],app_def["name"]))
+                app_class = getattr(imp_mod, app_def["name"])
+                app_class.context = self.context
+                self.app_classes[app_def["name"]] = app_class
+            except ImportError as ex :
+                log.error("App %s can't be loaded because of classloader error %s "%(app_def["name"],ex))
 
     def set_instance_state(self,instance_id,state):
         pass

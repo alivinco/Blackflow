@@ -33,7 +33,7 @@ DPKG_ROOT    := scripts/debian/dpkg-root
 DIST         := dist
 
 # Directories to use for building
-SRC_MAIN     := src-main
+SRC_MAIN     := ./
 BUILD        := build
 BUILD_OUT    := $(BUILD)/output
 

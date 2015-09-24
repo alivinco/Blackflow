@@ -5,6 +5,7 @@ APP=blackflow
 DIR=/usr/lib/${APP}
 DAEMON=/usr/lib/${APP}/blackflow_service.py
 DAEMON_NAME=${APP}
+DAEMON_OPTS="-c /etc/blackflow/blackflow_config.json -a /var/blackflow/apps"
 PYTHON_BIN=/usr/bin/python
 PARAMETERS=$@
 
@@ -15,11 +16,12 @@ DAEMON_USER=root
 # The process ID of the script when it runs is stored here:
 PIDFILE=/var/run/$DAEMON_NAME.pid
 
+
 . /lib/lsb/init-functions
 
 do_start () {
     log_daemon_msg "Starting system $DAEMON_NAME daemon"
-    start-stop-daemon --start --pidfile $PIDFILE --background --make-pidfile --user $DAEMON_USER --chdir $DIR --chuid $DAEMON_USER --startas $PYTHON_BIN $DAEMON
+    start-stop-daemon --start --pidfile $PIDFILE --background --make-pidfile --user $DAEMON_USER --chdir $DIR --chuid $DAEMON_USER --startas $PYTHON_BIN $DAEMON -- $DAEMON_OPTS
     log_end_msg $?
 }
 do_stop () {

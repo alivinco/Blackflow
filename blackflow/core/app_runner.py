@@ -1,7 +1,7 @@
 __author__ = 'alivinco'
 from Queue import Queue, Empty
 import logging
-from libs.thread_pool import ThreadPool
+from blackflow.libs.thread_pool import ThreadPool
 from smartlylib.service.Service import  Service
 
 log = logging.getLogger("bf_apps_runner")
