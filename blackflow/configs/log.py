@@ -35,7 +35,6 @@ config = {
         }
     },
     'loggers': {
-
         '':{
             "handlers": ["default", "info_file_handler", "error_file_handler"],
             'level':'DEBUG',

@@ -1,3 +1,3 @@
 {"instance_config":{"name":"default"},
  "mqtt":{"host":"localhost","port":1883},
- "log_dir":"./"}
+ "log_dir":"/var/log/blackflow"}

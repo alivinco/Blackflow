@@ -1,4 +1,5 @@
 import json
+import os
 
 __author__ = 'alivinco'
 import sys
@@ -14,8 +15,7 @@ from blackflow.handlers.api_mqtt_handler import ApiMqttHandler
 from smartlylib.service.Service import ServiceManager, ServiceState
 import logging, logging.config
 import blackflow.configs.log
-logging.config.dictConfig(blackflow.configs.log.config)
-log = logging.getLogger("bf_rules_runner")
+
 
 def sigterm_handler(signum, frame):
         log.info("Received signal #%d: %s. Shutting down service" % (signum, frame))
@@ -29,6 +29,11 @@ if __name__ == "__main__":
     with open(args.conf, "r") as app_file:
                     configs = json.loads(app_file.read())
     instance_name = configs["instance_config"]["name"]
+    blackflow.configs.log.config["handlers"]["info_file_handler"]["filename"] = os.path.join(configs["log_dir"],"blackflow_info.log")
+    blackflow.configs.log.config["handlers"]["error_file_handler"]["filename"] = os.path.join(configs["log_dir"],"blackflow_error.log")
+    logging.config.dictConfig(blackflow.configs.log.config)
+
+    log = logging.getLogger("bf_service")
 
     service_manager = ServiceManager("main")
     signal.signal(signal.SIGTERM, sigterm_handler)

@@ -59,7 +59,14 @@ class AppManager:
         Loads all app instance configurations
 
         """
-        self.app_instances_configs = json.load(file(self.instances_config_file))
+        try:
+            self.app_instances_configs = json.load(file(self.instances_config_file))
+        except IOError:
+            # app folder is empty and needs to be initialized
+            f = open(self.instances_config_file,"w")
+            f.write("[]")
+            f.close()
+            self.app_instances_configs = []
 
     def load_app_descriptors(self):
         """
