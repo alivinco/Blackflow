@@ -40,6 +40,7 @@ class MqttAdapter(Adapter):
     def unsubscribe(self, topic):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
+            log.info("Unsubscribing from topic = %s"%topic)
             self.mqtt.unsubscribe(str(topic))
 
     def on_message(self, client, userdata, msg):

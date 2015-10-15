@@ -64,9 +64,22 @@ class ApiMqttHandler:
                 id = self.app_man.configure_app_instance(inst_id,app_name,alias,sub_for,pub_to,configs,comments)
                 self.app_man.reload_app_instance(id)
             elif msg_subtype == "delete_app":
-                pass
+                app_name = msg["command"]["default"]["value"]
+                self.app_man.delete_app(app_name)
             elif msg_subtype == "delete_app_instance":
-                pass
+                inst_id = int(msg["command"]["default"]["value"])
+                self.app_man.delete_app_instance(inst_id)
+
+            elif msg_subtype == "control_app_instance":
+                inst_id = int(msg["command"]["default"]["value"])
+                action = msg["command"]["properties"]["action"]
+                if action == "START":
+                    self.app_man.start_app_instance(inst_id)
+                elif action == "PAUSE":
+                    self.app_man.pause_app_instance(inst_id)
+                if action == "STOP":
+                    self.app_man.stop_app_instance(inst_id)
+
             elif msg_subtype == "get_apps":
                 msg = msg_template.generate_msg_template("blackflow","event","blackflow","apps")
                 msg["event"]["properties"] = {"apps":self.app_man.get_apps()}
@@ -74,6 +87,7 @@ class ApiMqttHandler:
 
             elif msg_subtype == "get_app_instances":
                 msg = msg_template.generate_msg_template("blackflow","event","blackflow","app_instances")
+
                 msg["event"]["properties"] = {"app_instances":self.app_man.get_app_configs()}
                 self.mqtt_adapter.publish(self.pub_topic,msg)
 

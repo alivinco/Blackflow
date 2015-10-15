@@ -7,10 +7,10 @@ import importlib
 import json
 import os
 import logging
+import shutil
 log = logging.getLogger("bf_app_manager")
 
-class AppManager:
-    # application states
+class AppInstanceState:
     STOPPED = 0
     LOADED = 1
     INITIALIZED = 2
@@ -19,13 +19,16 @@ class AppManager:
     STOPPED_WITH_ERROR = 5
     PAUSED_WITH_ERROR = 6
 
+class AppManager:
+    # application states
+
     def __init__(self, context, adapters,apps_dir_path):
         self.apps_dir_path = apps_dir_path
         self.app_instances = []
         self.app_classes = {}
-        self.app_descriptors = None
+        self.app_descriptors = []
         # self.app_defs_path = os.path.join(self.apps_dir_path, "apps.json")
-        self.app_instances_configs = None
+        self.app_instances_configs = []
         self.context = context
         self.adapters = adapters
         self.instances_config_file = os.path.join(self.apps_dir_path, "app_configs.json")
@@ -45,9 +48,35 @@ class AppManager:
             f.write(src)
         self.serialize_app_defs()
 
-    # def serialize_app_defs(self):
-    #     with open(self.app_defs_path,"w") as f :
-    #         f.write(json.dumps(self.app_descriptors, indent=True))
+    def delete_app(self,app_name):
+        """
+        Deletes app from system completely.
+        :param app_name:
+        """
+        ai = self.get_app_instances_configs(app_name=app_name)
+        log.info("Deleting app %s"%app_name)
+        for ai_item in ai:
+            log.info("Deleting app instance %s"%ai_item.alias)
+            self.delete_app_instance(ai_item.get_id())
+            log.info("Deleting app descriptor")
+            ad = self.get_app_descriptor(app_name)
+            self.app_descriptors.remove(ad)
+            app_dir = os.path.join(self.apps_dir_path,"lib",ai_item.name)
+            log.info("Deleting app folder %s"%app_dir)
+            shutil.rmtree()
+        log.info("App %s was deleted"%app_name)
+
+    def delete_app_instance(self,instance_id):
+        """
+        Deletes application instance object , unsubscribese from all topics and removes entry from app_config.json
+        :param instance_id:
+        """
+        self.stop_app_instance(instance_id)
+        aic = self.get_app_instances_configs(instance_id=instance_id)
+        if aic:
+            self.app_instances_configs.remove(aic[0])
+            self.serialize_instances_config()
+
     def serialize_instances_config(self):
         log.info("Serializing instances config to file " + self.instances_config_file)
         f = open(self.instances_config_file, "w")
@@ -61,6 +90,8 @@ class AppManager:
         """
         try:
             self.app_instances_configs = json.load(file(self.instances_config_file))
+            for item in self.app_instances_configs:
+                item["state"] = AppInstanceState.STOPPED
         except IOError:
             # app folder is empty and needs to be initialized
             f = open(self.instances_config_file,"w")
@@ -70,7 +101,7 @@ class AppManager:
 
     def load_app_descriptors(self):
         """
-        Loads all application descriptors
+        Loads all application descriptors from lib folders
 
         """
         self.app_descriptors = []
@@ -97,7 +128,7 @@ class AppManager:
             inst_conf["pub_to"] = pub_to
             inst_conf["configs"] = configs
             inst_conf["comments"] = comments
-            inst_conf["state"] = self.STOPPED
+            inst_conf["state"] = AppInstanceState.STOPPED
             inst_conf["auto_startup"] = auto_startup
 
             self.serialize_instances_config()
@@ -114,7 +145,13 @@ class AppManager:
         """
         return self.app_descriptors
 
-    def get_app_instance(self, instance_id, instance_alias=None):
+    def get_app_instance_obj(self, instance_id, instance_alias=None):
+        """
+        Returns instance object
+        :param instance_id:
+        :param instance_alias:
+        :return:
+        """
         try :
             if instance_id:
                 return filter(lambda app_inst: app_inst.id == instance_id, self.app_instances)[0]
@@ -123,19 +160,84 @@ class AppManager:
         except :
             return None
 
-    def get_app_instances_configs(self, instance_id, instance_alias=None,app_name=None):
+    def get_app_instances_configs(self, instance_id=None, instance_alias=None,app_name=None):
+        """
+        Returns application instance configuration object
+        :param instance_id:
+        :param instance_alias:
+        :param app_name:
+        :return list of instance configurations:
+        """
         try:
             if instance_id:
-                return filter(lambda app_inst: app_inst.id == instance_id, self.app_instances_configs)
+                return filter(lambda app_inst: app_inst["id"] == instance_id, self.app_instances_configs)
             elif instance_alias:
-                return filter(lambda app_inst: app_inst.alias == instance_alias, self.app_instances_configs)
+                return filter(lambda app_inst: app_inst["alias"] == instance_alias, self.app_instances_configs)
             elif app_name:
-                return filter(lambda app_inst: app_inst.name == app_name, self.app_instances_configs)
+                return filter(lambda app_inst: app_inst["name"] == app_name, self.app_instances_configs)
+        except Exception as ex:
+            log.error("Instance can't be found because of error %s"%ex)
+            return None
+
+    def get_app_descriptor(self,app_name):
+        try:
+            return filter(lambda app_disc: app_disc["name"] == app_name, self.app_descriptors)[0]
         except:
             return None
 
     def get_app_configs(self):
         return self.app_instances_configs
+
+    def stop_app_instance(self,instance_id):
+        ai = self.get_app_instance_obj(instance_id)
+        if ai :
+            log.info("Unsubscribing from app's topics")
+            for key, topic in ai.sub_for.iteritems():
+                for adapter in self.adapters:
+                    adapter.unsubscribe(topic["topic"])
+            log.info("Deleting app instance oobject")
+            self.app_instances.remove(ai)
+            self.get_app_instances_configs(instance_id=instance_id)[0]["state"] = AppInstanceState.STOPPED
+            return True
+        else :
+            return False
+
+    def pause_app_instance(self,instance_id):
+        ai = self.get_app_instance_obj(instance_id)
+        if ai :
+            log.info("Pausing application instance , instance id = %s"%instance_id)
+            for key, topic in ai.sub_for.iteritems():
+                for adapter in self.adapters:
+                    adapter.unsubscribe(topic["topic"])
+            self.get_app_instances_configs(instance_id=instance_id)[0]["state"] = AppInstanceState.PAUSED
+            return True
+        else :
+            return False
+
+    def start_app_instance(self,instance_id):
+        app_config = self.get_app_instances_configs(instance_id=instance_id)[0]
+        state = app_config["state"]
+        if state == AppInstanceState.STOPPED or state == AppInstanceState.STOPPED_WITH_ERROR :
+            log.info("Starting stopped application instance ,instance id = %s"%instance_id)
+            self.configure_and_init_app_instance(instance_id=instance_id)
+            return True
+        elif state == AppInstanceState.PAUSED or state == AppInstanceState.PAUSED_WITH_ERROR :
+            app_inst = self.get_app_instance_obj(instance_id=instance_id)
+            try:
+                app_inst.on_start()
+                log.info("Reesuming paused application instance ,instance id = %s"%instance_id)
+                for key, subsc in app_inst.sub_for.iteritems():
+                        for adapter in self.adapters:
+                            adapter.subscribe(subsc["topic"])
+                app_config["state"] = AppInstanceState.RUNNING
+                return True
+            except Exception as ex :
+                app_config["error"] = str(ex)
+                app_config["state"] = AppInstanceState.PAUSED_WITH_ERROR
+                return False
+        else:
+            log.info("Application instance can't be started since it is already in state %s"%state)
+            return False
 
     def reload_app_instance(self,instance_id,app_name = ""):
         """
@@ -148,15 +250,7 @@ class AppManager:
         :param instance_id:
         """
         log.info("Reloading app . id = %s name = %s"%(instance_id,app_name))
-
-        ai = self.get_app_instance(instance_id)
-        if ai :
-            log.info("Unsubscribing from app's topics")
-            for key, topic in ai.sub_for.iteritems():
-                for adapter in self.adapters:
-                    adapter.unsubscribe(topic["topic"])
-            log.info("Deleting app instance")
-            self.app_instances.remove(ai)
+        if self.stop_app_instance(instance_id):
             self.load_app_instances_configs()
         self.configure_and_init_app_instance(instance_id)
 
@@ -176,7 +270,7 @@ class AppManager:
             self.app_classes[app_name] = app_class
 
             for ai in self.get_app_instances_configs(app_name=app_name):
-                ai["state"] = self.LOADED
+                ai["state"] = AppInstanceState.LOADED
                 log.debug("App instance %s state was changed to LOADED"%ai["alias"])
 
         except Exception as ex:
@@ -229,31 +323,31 @@ class AppManager:
 
     def configure_and_init_app_instance(self, instance_id=None, is_system_startup=False):
         """
-        Method creates app instances and configures them using configuration definitions .
+        Method creates application instances objects and configures them using configuration definitions .
         :param instance_id: optional paramters , if not specified then all instances are loaded , if specified then only one instance is loaded
         """
         log.info("Initializing app instance . Instance id = %s"%instance_id)
 
         for app_config in self.app_instances_configs:
-            if (instance_id is None or app_config["id"] == instance_id) and ((is_system_startup==True and app_config["auto_startup"]=="RUN") or is_system_startup==False) :
+            if (instance_id is None or app_config["id"] == instance_id) and ((is_system_startup==True and app_config["auto_startup"]=="START") or is_system_startup==False) :
                 app_inst = self.app_classes[app_config["name"]](app_config["id"], app_config["alias"], app_config["sub_for"], app_config["pub_to"], app_config["configs"])
                 try:
                     app_inst.on_start()
-                    app_config["state"] = self.INITIALIZED
+                    app_config["state"] = AppInstanceState.INITIALIZED
                     log.debug("App instance %s state was changed to INITIALIZED"%app_config["alias"])
+                     # setting up subscriptions in adapters
+                    for key, subsc in app_inst.sub_for.iteritems():
+                        for adapter in self.adapters:
+                            adapter.subscribe(subsc["topic"])
+                    app_config["state"] = AppInstanceState.RUNNING
+                    self.app_instances.append(app_inst)
                 except Exception as ex:
                     log.error("App %s can be started of error ")
                     log.exception(ex)
-                    app_config["state"] = self.STOPPED_WITH_ERROR
+                    app_config["state"] = AppInstanceState.STOPPED_WITH_ERROR
                     log.debug("App instance %s state was changed to STOPPED_WITH_ERROR"%app_config["alias"])
                     app_config["error"] = str(ex)
 
                 log.info("Apps with id = %s , name = %s , alias = %s was loaded." % (app_inst.id, app_inst.name, app_inst.alias))
 
-                # setting up subscriptions in adapters
-                for key, subsc in app_inst.sub_for.iteritems():
-                    for adapter in self.adapters:
-                        adapter.subscribe(subsc["topic"])
 
-                app_config["state"] = self.RUNNING
-                self.app_instances.append(app_inst)
