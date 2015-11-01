@@ -42,6 +42,37 @@ class AppManager:
         self.load_app_classes()
         self.configure_and_init_app_instance(is_system_startup=True)
 
+    def init_new_app(self,name,version=""):
+        """
+        The method initializes new app by creating app folder , app file and descriptor
+        :param name:
+        :param version:
+        """
+        app_full_name = "%s_%s"%(name,version)
+        new_app_dir = os.path.join(self.apps_dir_path,"lib",app_full_name)
+        if not os.path.exists(new_app_dir):
+            # 1. creating application folder
+            os.makedirs(new_app_dir)
+            open(os.path.join(new_app_dir,"__init__.py"),"w").close()
+            # 2. reading application template
+            with open(os.path.join("blackflow","libs","app_template.py"),"r") as f:
+                app_template = f.read()
+                app_template = app_template.replace("BfApplicationTemplate",app_full_name)
+            # 3. writing application template
+            with open(os.path.join(new_app_dir,"%s.py"%app_full_name),"w") as f:
+                f.write(app_template)
+            # 4. writing application descriptor
+            descr_template = {"name":name,"version":version,"description":"","sub_for":{},"pub_to":{},"configs":{}}
+            with open(os.path.join(new_app_dir,"%s.json"%app_full_name),"w") as f:
+                f.write(json.dumps(descr_template))
+            self.app_descriptors.append(descr_template)
+            log.info("Descriptor for %s app was loaded"%(app_full_name))
+            return (True,"")
+        else :
+            warn_msg = "App with name %s and version %s already exists , specify another name or version"%(name,version)
+            log.warn(warn_msg)
+            return (False,warn_msg)
+
     def add_new_app(self,name,sub_for,pub_to,configs,src):
         f_name = os.path.join(self.app_instances_configs,"lib",name)
         with open(f_name,"w") as f :
@@ -109,7 +140,7 @@ class AppManager:
         for item in os.listdir(apps_lib_path):
             if item not in ("__init__.py","__init__.pyc"):
                 self.app_descriptors.append(json.load(file(os.path.join(self.apps_dir_path,'lib',item, item+".json"))))
-                print "%s"%(item)
+                log.info("Descriptor for %s app was loaded"%(item))
 
     def configure_app_instance(self,id,app_name,alias,sub_for,pub_to,configs,comments,auto_startup="RUN"):
         with self.instances_config_lock:

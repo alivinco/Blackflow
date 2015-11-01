@@ -47,8 +47,8 @@ Application folder structure :
 + Class or artifact loading error flow : STOPPED -> (class loading or artifact loading error) -> STOPPED_WITH_ERROR
 + Initialization failure flow : STOPPED -> LOADED -> (error during initialization) -> STOPPED_WITH_ERROR
 + Non recoverable error during runtime , the same error repeats more then X times in a row : STOPPED ->LOADED -> INITIALIZED -> RUNNING -> (non recoverable error) -> PAUSED_WITH_ERROR
-+ User can send RUN , STOP  , PAUSE commands .
-+ Each application instance has auto_startup parameter with can take value RUN , STOP , PAUSE
++ User can send START , STOP  , PAUSE commands .
++ Each application instance has auto_startup parameter with can take value START , STOP , PAUSE
 
 
 ### Simple app example : 

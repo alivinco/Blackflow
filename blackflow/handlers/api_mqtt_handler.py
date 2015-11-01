@@ -7,7 +7,6 @@ log = logging.getLogger(__name__)
 
 class ApiMqttHandler:
 
-
     def __init__(self,app_manager,mqtt_adapter,context,instance_name):
         self.sub_topic = "/app/blackflow/%s/commands"%instance_name
         self.pub_topic = "/app/blackflow/%s/events"%instance_name
@@ -36,6 +35,16 @@ class ApiMqttHandler:
 
             if msg_subtype == "load_new_app" :
                self.app_man.load_new_app(msg["command"]["default"]["value"])
+
+            if msg_subtype == "init_new_app":
+               success , warn_msg = self.app_man.init_new_app(msg["command"]["default"]["value"],msg["command"]["properties"]["version"])
+               event_msg = msg_template.generate_msg_template("blackflow","event","status","code",msg)
+               if not success :
+                   event_msg["event"]["default"]["value"] = 500
+                   event_msg["event"]["properties"] = {"text":warn_msg}
+               else :
+                   event_msg["event"]["default"]["value"] = 200
+               self.mqtt_adapter.publish(self.pub_topic,event_msg)
 
             elif msg_subtype == "reload_app_instance":
                self.app_man.reload_app_instance(msg["command"]["default"]["value"])
@@ -124,10 +133,14 @@ class ApiMqttHandler:
                 name = msg["command"]["properties"]["name"]
                 type = msg["command"]["properties"]["type"]
                 data = msg["command"]["properties"]["bin_data"]
+                post_save_action = msg["command"]["properties"]["post_save_action"] if "post_save_action" in msg["command"]["properties"] else None
                 full_path = os.path.join(self.app_man.apps_dir_path,"lib",name)
                 bin_data = base64.b64decode(data)
                 with open(full_path, "wb") as app_file:
                     app_file.write(bin_data)
+                if post_save_action == "reload_desc":
+                    self.app_man.load_app_descriptors()
+
 
         elif msg_type == "config":
             if msg_subtype == "set" :
