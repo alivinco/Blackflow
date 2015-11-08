@@ -4,17 +4,18 @@
 
 Application folder structure :
 
-#### AppName directory:
+#### AppName_v1 directory:
   
 + AppName.py - App source code , normally an app keeps all logic withing the file .  
-+ AppName.json - App interface , used to generate app configurations .  
++ manifest.json - App interface , used to generate app configurations .  
 + __init\_\_.py  
 + libdir - libraries or source files  
 
 
-#### AppName.json structure :
+#### manifest.json structure :
 
 + name - Application name
++ version - Version
 + sub_for - List of topics/variables an app is subscribing for.
      key - subscription name  
      msg_type (optional) - message class .   

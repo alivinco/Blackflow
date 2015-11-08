@@ -1,5 +1,8 @@
 import os
 import base64
+
+from libs.utils import split_app_full_name
+
 __author__ = 'alivinco'
 import logging
 from blackflow.libs import msg_template
@@ -64,17 +67,19 @@ class ApiMqttHandler:
 
             elif msg_subtype == "configure_app_instance":
                 inst_id = msg["command"]["properties"]["id"]
-                app_name = msg["command"]["properties"]["name"]
+                app_full_name = msg["command"]["properties"]["app_full_name"]
                 alias = msg["command"]["properties"]["alias"]
                 sub_for = msg["command"]["properties"]["sub_for"]
                 pub_to = msg["command"]["properties"]["pub_to"]
                 configs = msg["command"]["properties"]["configs"]
                 comments = msg["command"]["properties"]["comments"]
-                id = self.app_man.configure_app_instance(inst_id,app_name,alias,sub_for,pub_to,configs,comments)
+                id = self.app_man.configure_app_instance(inst_id,app_full_name,alias,sub_for,pub_to,configs,comments)
                 self.app_man.reload_app_instance(id)
+
             elif msg_subtype == "delete_app":
-                app_name = msg["command"]["default"]["value"]
-                self.app_man.delete_app(app_name)
+                app_full_name = msg["command"]["default"]["value"]
+                self.app_man.delete_app(app_full_name)
+
             elif msg_subtype == "delete_app_instance":
                 inst_id = int(msg["command"]["default"]["value"])
                 self.app_man.delete_app_instance(inst_id)
@@ -91,7 +96,7 @@ class ApiMqttHandler:
 
             elif msg_subtype == "get_apps":
                 msg = msg_template.generate_msg_template("blackflow","event","blackflow","apps")
-                msg["event"]["properties"] = {"apps":self.app_man.get_apps()}
+                msg["event"]["properties"] = {"apps":self.app_man.get_app_manifests()}
                 self.mqtt_adapter.publish(self.pub_topic,msg)
 
             elif msg_subtype == "get_app_instances":
@@ -138,8 +143,8 @@ class ApiMqttHandler:
                 bin_data = base64.b64decode(data)
                 with open(full_path, "wb") as app_file:
                     app_file.write(bin_data)
-                if post_save_action == "reload_desc":
-                    self.app_man.load_app_descriptors()
+                if post_save_action == "reload_manifest":
+                    self.app_man.load_app_manifests()
 
 
         elif msg_type == "config":

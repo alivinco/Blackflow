@@ -1,5 +1,6 @@
 {
     "name":"ServoCam",
+    "version":"1",
     "sub_for":{"servo_command_msg":{"msg_type":"command.level.servo","adapter":"mqtt","topic":"mqtt:/app/servocam/commands","descr":"Control servo"},
                "servo_command_local":{"msg_type":"command.level.servo","adapter":"local","topic":"local:servocam"}},
     "pub_to" :{},

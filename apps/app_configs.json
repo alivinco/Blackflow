@@ -1,6 +1,6 @@
 [
  {
-  "name": "PullCordSirenApp", 
+  "app_full_name": "PullCordSirenApp_v1", 
   "alias": "PullCordSirenApp", 
   "comments": "Pulcord app test", 
   "id": 15, 
@@ -12,7 +12,7 @@
     "topic": "mqtt:/dev/zw/87/mod_alarm/1/events"
    }
   }, 
-  "state": 0, 
+  "state": 3, 
   "configs": {}, 
   "pub_to": {
    "siren_control": {
@@ -25,7 +25,7 @@
   "auto_startup": "START"
  }, 
  {
-  "name": "Pushnotificator", 
+  "app_full_name": "Pushnotificator_v1", 
   "alias": "Pushnotificator", 
   "comments": "", 
   "pub_to": {}, 
@@ -47,7 +47,7 @@
   "auto_startup": "START"
  }, 
  {
-  "name": "AlarmApp", 
+  "app_full_name": "AlarmApp_v1", 
   "alias": "AlarmApp", 
   "comments": "q", 
   "pub_to": {
@@ -68,7 +68,7 @@
   "auto_startup": "START"
  }, 
  {
-  "name": "ServoCam", 
+  "app_full_name": "ServoCam_v1", 
   "alias": "ServoCam", 
   "comments": "Servo control through arduino", 
   "pub_to": {}, 
@@ -89,7 +89,7 @@
   "auto_startup": "STOP"
  }, 
  {
-  "name": "FlowerWatering", 
+  "app_full_name": "FlowerWatering_v1", 
   "alias": "WateringPump1", 
   "comments": "", 
   "id": 20, 

@@ -1,1 +1,0 @@
-{"name":"AlarmApp","sub_for":{"binary_event":{"adapter":"mqtt","msg_type":"event.binary.motion","descr":"Binary alarm trigger"}},"pub_to":{"push_notification":{"adapter":"mqtt","msg_type":"command.notification.push","descr":"Push notificaiton sender"},"alarm_state":{"descr":"Alarm app state"}},"configs":["alarm_state_timeout"],"description":"Simple alarm application"}
