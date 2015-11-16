@@ -73,7 +73,9 @@ class ApiMqttHandler:
                 pub_to = msg["command"]["properties"]["pub_to"]
                 configs = msg["command"]["properties"]["configs"]
                 comments = msg["command"]["properties"]["comments"]
-                id = self.app_man.configure_app_instance(inst_id,app_full_name,alias,sub_for,pub_to,configs,comments)
+                schedules = msg["command"]["properties"]["schedules"]
+
+                id = self.app_man.configure_app_instance(inst_id,app_full_name,alias,sub_for,pub_to,configs,comments,schedules=schedules)
                 self.app_man.reload_app_instance(id)
 
             elif msg_subtype == "delete_app":

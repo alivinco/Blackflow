@@ -1,19 +1,8 @@
 [
  {
   "app_full_name": "PullCordSirenApp_v1", 
-  "alias": "PullCordSirenApp", 
+  "alias": "PullCordSirenAppTest", 
   "comments": "Pulcord app test", 
-  "id": 15, 
-  "sub_for": {
-   "emergency_button": {
-    "topic": "mqtt:/dev/zw/90/mod_alarm/1/events"
-   }, 
-   "pull_cord": {
-    "topic": "mqtt:/dev/zw/87/mod_alarm/1/events"
-   }
-  }, 
-  "state": 3, 
-  "configs": {}, 
   "pub_to": {
    "siren_control": {
     "topic": "mqtt:/dev/zw/84/mod_siren/1/commands"
@@ -22,13 +11,25 @@
     "topic": "local:push_cmd_local"
    }
   }, 
+  "sub_for": {
+   "emergency_button": {
+    "topic": "mqtt:/dev/zw/90/mod_alarm/1/events"
+   }, 
+   "pull_cord": {
+    "topic": "mqtt:/dev/zw/87/mod_alarm/1/events"
+   }
+  }, 
+  "state": 0, 
+  "schedules": [], 
+  "configs": {}, 
+  "id": 15, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "Pushnotificator_v1", 
   "alias": "Pushnotificator", 
   "comments": "", 
-  "pub_to": {}, 
+  "id": 16, 
   "sub_for": {
    "push_cmd": {
     "topic": "mqtt:/app/bf_pushnotificator/commands"
@@ -37,47 +38,50 @@
     "topic": "local:push_cmd_local"
    }
   }, 
-  "state": 3, 
+  "state": 0, 
+  "schedules": [], 
   "configs": {
    "pushover_app_token": "ap2d7Ru4y1hYJJw1zzP3MnZMGqzwx6", 
    "pushbullet_api_key": "hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2", 
    "pushover_client_id": "uFMfKKZTvx9Phh8ctzRzUHUyYYwGtX"
   }, 
-  "id": 16, 
+  "pub_to": {}, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "AlarmApp_v1", 
   "alias": "AlarmApp", 
   "comments": "q", 
-  "pub_to": {
-   "push_notification": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
+  "id": 17, 
   "sub_for": {
    "binary_event": {
     "topic": "mqtt:/dev/zw/75/bin_motion/1/events"
    }
   }, 
-  "state": 3, 
+  "state": 0, 
+  "schedules": [], 
   "configs": {
    "alarm_state_timeout": 60
   }, 
-  "id": 17, 
+  "pub_to": {
+   "push_notification": {
+    "topic": "local:push_cmd_local"
+   }
+  }, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "ServoCam_v1", 
   "alias": "ServoCam", 
+  "schedules": [], 
   "comments": "Servo control through arduino", 
-  "pub_to": {}, 
+  "id": 19, 
   "sub_for": {
-   "servo_command_msg": {
-    "topic": "mqtt:/app/servocam/commands"
-   }, 
    "servo_command_local": {
     "topic": "local:servocam"
+   }, 
+   "servo_command_msg": {
+    "topic": "mqtt:/app/servocam/commands"
    }
   }, 
   "state": 0, 
@@ -85,29 +89,53 @@
   "configs": {
    "api_key": ""
   }, 
-  "id": 19, 
+  "pub_to": {}, 
   "auto_startup": "STOP"
  }, 
  {
   "app_full_name": "FlowerWatering_v1", 
   "alias": "WateringPump1", 
   "comments": "", 
-  "id": 20, 
-  "sub_for": {
-   "start_msg": {
-    "topic": "mqtt:/app/bf_watering_pump_1/commands"
-   }
-  }, 
-  "state": 3, 
-  "configs": {
-   "pump_on_duration": "4"
-  }, 
   "pub_to": {
    "watering_status": {
     "topic": "local:watering_status_pump_1"
    }, 
    "pump_control_msg": {
     "topic": "mqtt:/dev/zw/4/bin_switch/1/commands"
+   }
+  }, 
+  "sub_for": {
+   "start_msg": {
+    "topic": "mqtt:/app/bf_watering_pump_1/commands"
+   }
+  }, 
+  "state": 0, 
+  "schedules": [], 
+  "configs": {
+   "pump_on_duration": "4"
+  }, 
+  "id": 20, 
+  "auto_startup": "START"
+ }, 
+ {
+  "app_full_name": "SchedulerTest_v1", 
+  "alias": "SchedulerTest", 
+  "schedules": [
+   {
+    "second": 5, 
+    "name": "ping", 
+    "trigger_type": "cron"
+   }
+  ], 
+  "comments": "", 
+  "id": 23, 
+  "sub_for": {}, 
+  "state": 0, 
+  "error": "unsupported type for timedelta seconds component: unicode", 
+  "configs": {}, 
+  "pub_to": {
+   "push_notif_msg": {
+    "topic": "local:push_cmd_local"
    }
   }, 
   "auto_startup": "START"

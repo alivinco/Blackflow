@@ -11,6 +11,7 @@ class AppAnalytics:
             r[0][2]+=1
         else:
             self.link_couters.append([src,dst,1])
+
     def get_all_link_counters(self):
         return self.link_couters
 

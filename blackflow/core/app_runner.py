@@ -1,10 +1,11 @@
-__author__ = 'alivinco'
 from Queue import Queue, Empty
 import logging
 from blackflow.libs.thread_pool import ThreadPool
 from smartlylib.service.Service import  Service
+__author__ = 'alivinco'
 
 log = logging.getLogger("bf_apps_runner")
+
 
 class AppRunner(Service):
     def __init__(self, context,adapters,app_manager):

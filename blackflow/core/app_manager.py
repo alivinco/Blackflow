@@ -1,15 +1,18 @@
 import sys
 from threading import Lock
 from blackflow.libs.utils import get_next_id
+from core.app_scheduler import AppScheduler
 from libs.utils import split_app_full_name, compose_app_full_name
-
-__author__ = 'alivinco'
+from apscheduler.schedulers.background import BackgroundScheduler
+import copy
 import importlib
 import json
 import os
 import logging
 import shutil
+__author__ = 'alivinco'
 log = logging.getLogger("bf_app_manager")
+
 
 class AppInstanceState:
     STOPPED = 0
@@ -20,10 +23,11 @@ class AppInstanceState:
     STOPPED_WITH_ERROR = 5
     PAUSED_WITH_ERROR = 6
 
+
 class AppManager:
     # application states
 
-    def __init__(self, context, adapters,apps_dir_path):
+    def __init__(self, context, adapters, apps_dir_path):
         self.apps_dir_path = apps_dir_path
         self.app_instances = []
         self.app_classes = {}
@@ -34,6 +38,8 @@ class AppManager:
         self.adapters = adapters
         self.instances_config_file = os.path.join(self.apps_dir_path, "app_configs.json")
         self.instances_config_lock = Lock()
+        self.scheduler = AppScheduler()
+        self.scheduler.init_scheduler()
         # self.configure_and_init_app_instance()
         log.info("App init process completed. %s apps were initialized and configured " % len(self.app_instances))
 
@@ -43,62 +49,62 @@ class AppManager:
         self.load_app_classes()
         self.configure_and_init_app_instance(is_system_startup=True)
 
-    def init_new_app(self,name,version=""):
+    def init_new_app(self, name, version=""):
         """
         The method initializes new app by creating app folder , app file and descriptor
         :param name:
         :param version:
         """
-        app_full_name = "%s_v%s"%(name,version)
-        new_app_dir = os.path.join(self.apps_dir_path,"lib",app_full_name)
+        app_full_name = "%s_v%s" % (name, version)
+        new_app_dir = os.path.join(self.apps_dir_path, "lib", app_full_name)
         if not os.path.exists(new_app_dir):
             # 1. creating application folder
             os.makedirs(new_app_dir)
-            open(os.path.join(new_app_dir,"__init__.py"),"w").close()
+            open(os.path.join(new_app_dir, "__init__.py"), "w").close()
             # 2. reading application template
-            with open(os.path.join("blackflow","libs","app_template.py"),"r") as f:
+            with open(os.path.join("blackflow", "libs", "app_template.py"), "r") as f:
                 app_template = f.read()
-                app_template = app_template.replace("BfApplicationTemplate",name)
+                app_template = app_template.replace("BfApplicationTemplate", name)
             # 3. writing application template
-            with open(os.path.join(new_app_dir,"%s.py"%name),"w") as f:
+            with open(os.path.join(new_app_dir, "%s.py" % name), "w") as f:
                 f.write(app_template)
             # 4. writing application descriptor
-            descr_template = {"name":name,"version":version,"description":"","sub_for":{},"pub_to":{},"configs":{}}
-            with open(os.path.join(new_app_dir,"manifest.json"),"w") as f:
+            descr_template = {"name": name, "version": version, "description": "", "sub_for": {}, "pub_to": {}, "configs": {}}
+            with open(os.path.join(new_app_dir, "manifest.json"), "w") as f:
                 f.write(json.dumps(descr_template))
             self.app_manifests.append(descr_template)
-            log.info("Manifest for %s app was loaded"%(app_full_name))
-            return (True,"")
-        else :
-            warn_msg = "App with name %s and version %s already exists , specify another name or version"%(name,version)
+            log.info("Manifest for %s app was loaded" % (app_full_name))
+            return (True, "")
+        else:
+            warn_msg = "App with name %s and version %s already exists , specify another name or version" % (name, version)
             log.warn(warn_msg)
-            return (False,warn_msg)
+            return (False, warn_msg)
 
-    def add_new_app(self,name,sub_for,pub_to,configs,src):
-        f_name = os.path.join(self.app_instances_configs,"lib",name)
-        with open(f_name,"w") as f :
+    def add_new_app(self, name, sub_for, pub_to, configs, src):
+        f_name = os.path.join(self.app_instances_configs, "lib", name)
+        with open(f_name, "w") as f:
             f.write(src)
         self.serialize_app_defs()
 
-    def delete_app(self,app_full_name):
+    def delete_app(self, app_full_name):
         """
         Deletes app from system completely.
         :param app_name:
         """
         ai = self.get_app_instances_configs(app_full_name=app_full_name)
-        log.info("Deleting app %s"%app_full_name)
+        log.info("Deleting app %s" % app_full_name)
         for ai_item in ai:
-            log.info("Deleting app instance %s"%ai_item["alias"])
+            log.info("Deleting app instance %s" % ai_item["alias"])
             self.delete_app_instance(ai_item["id"])
         log.info("Deleting application manifest")
         ad = self.get_app_manifest(app_full_name)
         self.app_manifests.remove(ad)
-        app_dir = os.path.join(self.apps_dir_path,"lib",app_full_name)
-        log.info("Deleting app folder %s"%app_dir)
+        app_dir = os.path.join(self.apps_dir_path, "lib", app_full_name)
+        log.info("Deleting app folder %s" % app_dir)
         shutil.rmtree(app_dir)
-        log.info("App %s was deleted"%app_full_name)
+        log.info("App %s was deleted" % app_full_name)
 
-    def delete_app_instance(self,instance_id):
+    def delete_app_instance(self, instance_id):
         """
         Deletes application instance object , unsubscribese from all topics and removes entry from app_config.json
         :param instance_id:
@@ -126,7 +132,7 @@ class AppManager:
                 item["state"] = AppInstanceState.STOPPED
         except IOError:
             # app folder is empty and needs to be initialized
-            f = open(self.instances_config_file,"w")
+            f = open(self.instances_config_file, "w")
             f.write("[]")
             f.close()
             self.app_instances_configs = []
@@ -137,20 +143,21 @@ class AppManager:
 
         """
         self.app_manifests = []
-        apps_lib_path = os.path.join(self.apps_dir_path,"lib")
+        apps_lib_path = os.path.join(self.apps_dir_path, "lib")
         for app_dir in os.listdir(apps_lib_path):
-            if app_dir not in ("__init__.py","__init__.pyc"):
-                if app_dir.find("_v")>1:
+            if app_dir not in ("__init__.py", "__init__.pyc"):
+                if app_dir.find("_v") > 1:
                     app_name = app_dir[:app_dir.find("_v")]
-                    self.app_manifests.append(json.load(file(os.path.join(self.apps_dir_path,'lib',app_dir, "manifest.json"))))
-                    log.info("Manifest for %s app was loaded"%(app_dir))
+                    self.app_manifests.append(json.load(file(os.path.join(self.apps_dir_path, 'lib', app_dir, "manifest.json"))))
+                    log.info("Manifest for %s app was loaded" % (app_dir))
                 else:
-                    log.info("Directory %s will be skipped from app loader . Doesn't match naming convention ."%app_dir)
+                    log.info("Directory %s will be skipped from app loader . Doesn't match naming convention ." % app_dir)
 
-    def configure_app_instance(self,id,app_full_name,alias,sub_for,pub_to,configs,comments,auto_startup="RUN"):
+    def configure_app_instance(self, id, app_full_name, alias, sub_for, pub_to, configs, comments, auto_startup="START", schedules=[]):
         """
         Appends new or modifies existing app instance configuration . The methods modifies data structure ,
         serializes it to disk but doesn't reload actual instance .
+        :param schedules:
         :param id: Application instance id
         :type id: int
         :param app_full_name: Application full name = App name + version
@@ -165,8 +172,8 @@ class AppManager:
         :return:
         """
         with self.instances_config_lock:
-            inst_conf_list = filter(lambda conf : conf["id"]==id,self.app_instances_configs)
-            if len(inst_conf_list)==0:
+            inst_conf_list = filter(lambda conf: conf["id"] == id, self.app_instances_configs)
+            if len(inst_conf_list) == 0:
                 inst_id = get_next_id(self.app_instances_configs)
                 inst_conf = {"id": inst_id}
                 inst_conf["app_full_name"] = app_full_name
@@ -182,6 +189,7 @@ class AppManager:
             inst_conf["comments"] = comments
             inst_conf["state"] = AppInstanceState.STOPPED
             inst_conf["auto_startup"] = auto_startup
+            inst_conf["schedules"] = schedules
 
             self.serialize_instances_config()
         return inst_id
@@ -196,12 +204,12 @@ class AppManager:
         :param instance_alias:
         :return:
         """
-        try :
+        try:
             if instance_id:
                 return filter(lambda app_inst: app_inst.id == instance_id, self.app_instances)[0]
             elif instance_alias:
                 return filter(lambda app_inst: app_inst.alias == instance_alias, self.app_instances)[0]
-        except :
+        except:
             return None
 
     def get_app_instances_configs(self, instance_id=None, instance_alias=None, app_full_name=None):
@@ -220,7 +228,7 @@ class AppManager:
             elif app_full_name:
                 return filter(lambda app_inst: app_inst["app_full_name"] == app_full_name, self.app_instances_configs)
         except Exception as ex:
-            log.error("Instance can't be found because of error %s"%ex)
+            log.error("Instance can't be found because of error %s" % ex)
             return None
 
     def get_app_manifests(self):
@@ -232,7 +240,7 @@ class AppManager:
         return self.app_manifests
 
     def get_app_manifest(self, app_full_name):
-        app_name,version = split_app_full_name(app_full_name)
+        app_name, version = split_app_full_name(app_full_name)
         try:
             return filter(lambda app_manif: app_manif["name"] == app_name and app_manif["version"] == version, self.app_manifests)[0]
         except:
@@ -241,58 +249,62 @@ class AppManager:
     def get_app_configs(self):
         return self.app_instances_configs
 
-    def stop_app_instance(self,instance_id):
+    def stop_app_instance(self, instance_id):
         ai = self.get_app_instance_obj(instance_id)
-        if ai :
+        if ai:
             log.info("Unsubscribing from app's topics")
             for key, topic in ai.sub_for.iteritems():
                 for adapter in self.adapters:
                     adapter.unsubscribe(topic["topic"])
+            self.scheduler.remove_schedules_for_instance(instance_id)
+
             log.info("Deleting app instance oobject")
             self.app_instances.remove(ai)
             self.get_app_instances_configs(instance_id=instance_id)[0]["state"] = AppInstanceState.STOPPED
             return True
-        else :
+        else:
             return False
 
-    def pause_app_instance(self,instance_id):
+    def pause_app_instance(self, instance_id):
         ai = self.get_app_instance_obj(instance_id)
-        if ai :
-            log.info("Pausing application instance , instance id = %s"%instance_id)
+        if ai:
+            log.info("Pausing application instance , instance id = %s" % instance_id)
             for key, topic in ai.sub_for.iteritems():
                 for adapter in self.adapters:
                     adapter.unsubscribe(topic["topic"])
             self.get_app_instances_configs(instance_id=instance_id)[0]["state"] = AppInstanceState.PAUSED
             return True
-        else :
+        else:
             return False
 
-    def start_app_instance(self,instance_id):
+    def start_app_instance(self, instance_id):
         app_config = self.get_app_instances_configs(instance_id=instance_id)[0]
         state = app_config["state"]
-        if state == AppInstanceState.STOPPED or state == AppInstanceState.STOPPED_WITH_ERROR :
-            log.info("Starting stopped application instance ,instance id = %s"%instance_id)
+        if state == AppInstanceState.STOPPED or state == AppInstanceState.STOPPED_WITH_ERROR:
+            log.info("Starting stopped application instance ,instance id = %s" % instance_id)
             self.configure_and_init_app_instance(instance_id=instance_id)
             return True
-        elif state == AppInstanceState.PAUSED or state == AppInstanceState.PAUSED_WITH_ERROR :
+        elif state == AppInstanceState.PAUSED or state == AppInstanceState.PAUSED_WITH_ERROR:
             app_inst = self.get_app_instance_obj(instance_id=instance_id)
             try:
                 app_inst.on_start()
-                log.info("Reesuming paused application instance ,instance id = %s"%instance_id)
+                log.info("Reesuming paused application instance ,instance id = %s" % instance_id)
                 for key, subsc in app_inst.sub_for.iteritems():
-                        for adapter in self.adapters:
-                            adapter.subscribe(subsc["topic"])
+                    for adapter in self.adapters:
+                        adapter.subscribe(subsc["topic"])
+                if len(app_config["schedules"]) > 0:
+                        self.scheduler.init_schedule(app_config,app_inst)
                 app_config["state"] = AppInstanceState.RUNNING
                 return True
-            except Exception as ex :
+            except Exception as ex:
                 app_config["error"] = str(ex)
                 app_config["state"] = AppInstanceState.PAUSED_WITH_ERROR
                 return False
         else:
-            log.info("Application instance can't be started since it is already in state %s"%state)
+            log.info("Application instance can't be started since it is already in state %s" % state)
             return False
 
-    def reload_app_instance(self,instance_id,app_name = ""):
+    def reload_app_instance(self, instance_id, app_name=""):
         """
         The method recreates app instance . Class is not reloaded .
         Should be invoked after configuration parameters were modified .
@@ -302,34 +314,34 @@ class AppManager:
         :param app_name:
         :param instance_id:
         """
-        log.info("Reloading app . id = %s name = %s"%(instance_id,app_name))
+        log.info("Reloading app . id = %s name = %s" % (instance_id, app_name))
         if self.stop_app_instance(instance_id):
             self.load_app_instances_configs()
         self.configure_and_init_app_instance(instance_id)
 
-    def load_new_app(self , app_full_name):
+    def load_new_app(self, app_full_name):
         """
         The method loads and initializes new app
         :param app_name: App name
         :param instance_id: App configuration instance id
         """
-        log.info("Loading %s app descriptor and class"%app_full_name)
+        log.info("Loading %s app descriptor and class" % app_full_name)
         try:
-            self.app_manifests.append(json.load(file(os.path.join(self.apps_dir_path,'lib',app_full_name, "manifest.json"))))
+            self.app_manifests.append(json.load(file(os.path.join(self.apps_dir_path, 'lib', app_full_name, "manifest.json"))))
             # loading app class
-            app_name , version = split_app_full_name(app_full_name)
-            imp_mod = importlib.import_module("apps.lib.%s.%s"%(app_full_name,app_name))
+            app_name, version = split_app_full_name(app_full_name)
+            imp_mod = importlib.import_module("apps.lib.%s.%s" % (app_full_name, app_name))
             app_class = getattr(imp_mod, app_name)
             app_class.context = self.context
             self.app_classes[app_full_name] = app_class
 
             for ai in self.get_app_instances_configs(app_full_name=app_full_name):
                 ai["state"] = AppInstanceState.LOADED
-                log.debug("App instance %s state was changed to LOADED"%ai["alias"])
+                log.debug("App instance %s state was changed to LOADED" % ai["alias"])
 
         except Exception as ex:
             log.exception(ex)
-            #TODO: post error via msg adapter
+            # TODO: post error via msg adapter
 
     def reload_app(self, app_full_name):
         """
@@ -337,7 +349,7 @@ class AppManager:
         :param app_full_name:
         """
         log.info("Reloading app module %s" % app_full_name)
-        app_name , version = split_app_full_name(app_full_name)
+        app_name, version = split_app_full_name(app_full_name)
         mod_ref = sys.modules["apps.lib.%s.%s" % (app_full_name, app_name)]
         reload_success = False
         try:
@@ -346,7 +358,7 @@ class AppManager:
         except Exception as ex:
             log.exception(ex)
             error = str(ex)
-            #TODO: Send notification via API
+            # TODO: Send notification via API
 
         if reload_success:
             mod_ref = sys.modules["apps.lib.%s.%s" % (app_full_name, app_name)]
@@ -356,7 +368,7 @@ class AppManager:
             for app in apps:
                 self.reload_app_instance(app["id"], app_full_name)
             return True, None
-        else :
+        else:
             return False, error
 
     def load_app_classes(self):
@@ -366,15 +378,15 @@ class AppManager:
         """
         for app_manif in self.app_manifests:
             try:
-                app_full_name = compose_app_full_name(app_manif["name"],app_manif["version"])
-                imp_mod = importlib.import_module("apps.lib.%s.%s"%(app_full_name,app_manif["name"]))
+                app_full_name = compose_app_full_name(app_manif["name"], app_manif["version"])
+                imp_mod = importlib.import_module("apps.lib.%s.%s" % (app_full_name, app_manif["name"]))
                 app_class = getattr(imp_mod, app_manif["name"])
                 app_class.context = self.context
                 self.app_classes[app_full_name] = app_class
-            except ImportError as ex :
-                log.error("App %s can't be loaded because of classloader error %s "%(app_full_name,ex))
+            except ImportError as ex:
+                log.error("App %s can't be loaded because of classloader error %s " % (app_full_name, ex))
 
-    def set_instance_state(self,instance_id,state):
+    def set_instance_state(self, instance_id, state):
         pass
 
     def configure_and_init_app_instance(self, instance_id=None, is_system_startup=False):
@@ -382,28 +394,31 @@ class AppManager:
         Method creates application instances objects and configures them using configuration definitions .
         :param instance_id: optional paramters , if not specified then all instances are loaded , if specified then only one instance is loaded
         """
-        log.info("Initializing app instance . Instance id = %s"%instance_id)
+        log.info("Initializing app instance . Instance id = %s" % instance_id)
 
         for app_config in self.app_instances_configs:
-            if (instance_id is None or app_config["id"] == instance_id) and ((is_system_startup==True and app_config["auto_startup"]=="START") or is_system_startup==False) :
-                app_inst = self.app_classes[app_config["app_full_name"]](app_config["id"], app_config["alias"], app_config["sub_for"], app_config["pub_to"], app_config["configs"])
+            if (instance_id is None or app_config["id"] == instance_id) and (
+                        (is_system_startup == True and app_config["auto_startup"] == "START") or is_system_startup == False):
+                app_inst = self.app_classes[app_config["app_full_name"]](app_config["id"], app_config["alias"], app_config["sub_for"], app_config["pub_to"],
+                                                                         app_config["configs"])
                 try:
                     app_inst.on_start()
+                    # Add job to scheduler here
                     app_config["state"] = AppInstanceState.INITIALIZED
-                    log.debug("App instance %s state was changed to INITIALIZED"%app_config["alias"])
-                     # setting up subscriptions in adapters
+                    log.debug("App instance %s state was changed to INITIALIZED" % app_config["alias"])
+                    # setting up subscriptions in adapters
                     for key, subsc in app_inst.sub_for.iteritems():
                         for adapter in self.adapters:
                             adapter.subscribe(subsc["topic"])
                     app_config["state"] = AppInstanceState.RUNNING
+                    if len(app_config["schedules"]) > 0:
+                        self.scheduler.init_schedule(app_config,app_inst)
                     self.app_instances.append(app_inst)
                 except Exception as ex:
                     log.error("App %s can be started of error ")
                     log.exception(ex)
                     app_config["state"] = AppInstanceState.STOPPED_WITH_ERROR
-                    log.debug("App instance %s state was changed to STOPPED_WITH_ERROR"%app_config["alias"])
+                    log.debug("App instance %s state was changed to STOPPED_WITH_ERROR" % app_config["alias"])
                     app_config["error"] = str(ex)
 
                 log.info("Apps with id = %s , name = %s , alias = %s was loaded." % (app_inst.id, app_inst.name, app_inst.alias))
-
-
