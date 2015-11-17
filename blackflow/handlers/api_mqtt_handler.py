@@ -35,8 +35,8 @@ class ApiMqttHandler:
                msg["event"]["default"]["value"] = success
                self.mqtt_adapter.publish(self.pub_topic,msg)
 
-            if msg_subtype == "load_new_app" :
-               self.app_man.load_new_app(msg["command"]["default"]["value"])
+            if msg_subtype == "load_app_class" :
+               self.app_man.load_app_class(msg["command"]["default"]["value"])
 
             if msg_subtype == "init_new_app":
                success , warn_msg = self.app_man.init_new_app(msg["command"]["default"]["value"],msg["command"]["properties"]["version"])

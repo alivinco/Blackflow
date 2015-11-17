@@ -44,7 +44,7 @@ class AppManager:
     def start_apps(self):
         self.load_app_manifests()
         self.load_app_instances_configs()
-        self.load_app_classes()
+        self.load_all_app_classes()
         self.configure_and_init_app_instance(is_system_startup=True)
 
     def init_new_app(self, name, version=""):
@@ -78,16 +78,10 @@ class AppManager:
             log.warn(warn_msg)
             return (False, warn_msg)
 
-    def add_new_app(self, name, sub_for, pub_to, configs, src):
-        f_name = os.path.join(self.app_instances_configs, "lib", name)
-        with open(f_name, "w") as f:
-            f.write(src)
-        self.serialize_app_defs()
-
     def delete_app(self, app_full_name):
         """
-        Deletes app from system completely.
-        :param app_name:
+        Deletes application and all it's instance from system completely.
+        :param app_full_name:
         """
         ai = self.get_app_instances_configs(app_full_name=app_full_name)
         log.info("Deleting app %s" % app_full_name)
@@ -197,7 +191,7 @@ class AppManager:
 
     def get_app_instance_obj(self, instance_id, instance_alias=None):
         """
-        Returns instance object
+        Returns application instance object
         :param instance_id:
         :param instance_alias:
         :return:
@@ -236,6 +230,9 @@ class AppManager:
         :return:
         """
         return self.app_manifests
+
+    def load_app_manifest(self,app_full_name):
+        self.app_manifests.append(json.load(file(os.path.join(self.apps_dir_path, 'lib', app_full_name, "manifest.json"))))
 
     def get_app_manifest(self, app_full_name):
         app_name, version = split_app_full_name(app_full_name)
@@ -317,30 +314,6 @@ class AppManager:
             self.load_app_instances_configs()
         self.configure_and_init_app_instance(instance_id)
 
-    def load_new_app(self, app_full_name):
-        """
-        The method loads and initializes new app
-        :param app_name: App name
-        :param instance_id: App configuration instance id
-        """
-        log.info("Loading %s app descriptor and class" % app_full_name)
-        try:
-            self.app_manifests.append(json.load(file(os.path.join(self.apps_dir_path, 'lib', app_full_name, "manifest.json"))))
-            # loading app class
-            app_name, version = split_app_full_name(app_full_name)
-            imp_mod = importlib.import_module("apps.lib.%s.%s" % (app_full_name, app_name))
-            app_class = getattr(imp_mod, app_name)
-            app_class.context = self.context
-            self.app_classes[app_full_name] = app_class
-
-            for ai in self.get_app_instances_configs(app_full_name=app_full_name):
-                ai["state"] = AppInstanceState.LOADED
-                log.debug("App instance %s state was changed to LOADED" % ai["alias"])
-
-        except Exception as ex:
-            log.exception(ex)
-            # TODO: post error via msg adapter
-
     def reload_app(self, app_full_name):
         """
         Reloads app class and reinitialize app instance . Should be invoked when app source code was changed.
@@ -369,20 +342,38 @@ class AppManager:
         else:
             return False, error
 
-    def load_app_classes(self):
+    def load_all_app_classes(self):
         """
-        The method import and stores class definitions into dict , so they can be used to create app instances .
+        Loads all application classes into dictionary , so they can be used to create app instances .
 
         """
         for app_manif in self.app_manifests:
-            try:
                 app_full_name = compose_app_full_name(app_manif["name"], app_manif["version"])
-                imp_mod = importlib.import_module("apps.lib.%s.%s" % (app_full_name, app_manif["name"]))
-                app_class = getattr(imp_mod, app_manif["name"])
-                app_class.context = self.context
-                self.app_classes[app_full_name] = app_class
-            except ImportError as ex:
+                self.load_app_class(app_full_name)
+
+    def load_app_class(self, app_full_name):
+        """
+        Loads application manifest and class .
+        :param app_name: App name
+        :param instance_id: App configuration instance id
+        """
+        log.info("Loading %s app descriptor and class" % app_full_name)
+        try:
+            # loading application class
+            app_name, version = split_app_full_name(app_full_name)
+            imp_mod = importlib.import_module("apps.lib.%s.%s" % (app_full_name, app_name))
+            app_class = getattr(imp_mod, app_name)
+            app_class.context = self.context
+            self.app_classes[app_full_name] = app_class
+
+            for ai in self.get_app_instances_configs(app_full_name=app_full_name):
+                ai["state"] = AppInstanceState.LOADED
+                log.debug("App instance %s state was changed to LOADED" % ai["alias"])
+        except ImportError as ex:
                 log.error("App %s can't be loaded because of classloader error %s " % (app_full_name, ex))
+        except Exception as ex:
+            log.exception(ex)
+            # TODO: post error via msg adapter
 
     def set_instance_state(self, instance_id, state):
         pass
@@ -400,7 +391,7 @@ class AppManager:
 
                 app_full_name = app_config["app_full_name"]
                 if not(app_full_name in self.app_classes):
-                    self.load_new_app(app_full_name)
+                    self.load_app_class(app_full_name)
 
                 app_inst = self.app_classes[app_full_name](app_config["id"], app_config["alias"], app_config["sub_for"], app_config["pub_to"],app_config["configs"])
                 try:
