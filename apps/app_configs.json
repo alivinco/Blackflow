@@ -3,14 +3,7 @@
   "app_full_name": "PullCordSirenApp_v1", 
   "alias": "PullCordSirenAppTest", 
   "comments": "Pulcord app test", 
-  "pub_to": {
-   "siren_control": {
-    "topic": "mqtt:/dev/zw/84/mod_siren/1/commands"
-   }, 
-   "push_cmd_local": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
+  "id": 15, 
   "sub_for": {
    "emergency_button": {
     "topic": "mqtt:/dev/zw/90/mod_alarm/1/events"
@@ -22,14 +15,21 @@
   "state": 0, 
   "schedules": [], 
   "configs": {}, 
-  "id": 15, 
+  "pub_to": {
+   "siren_control": {
+    "topic": "mqtt:/dev/zw/84/mod_siren/1/commands"
+   }, 
+   "push_cmd_local": {
+    "topic": "local:push_cmd_local"
+   }
+  }, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "Pushnotificator_v1", 
   "alias": "Pushnotificator", 
   "comments": "", 
-  "id": 16, 
+  "pub_to": {}, 
   "sub_for": {
    "push_cmd": {
     "topic": "mqtt:/app/bf_pushnotificator/commands"
@@ -45,14 +45,18 @@
    "pushbullet_api_key": "hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2", 
    "pushover_client_id": "uFMfKKZTvx9Phh8ctzRzUHUyYYwGtX"
   }, 
-  "pub_to": {}, 
+  "id": 16, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "AlarmApp_v1", 
   "alias": "AlarmApp", 
   "comments": "q", 
-  "id": 17, 
+  "pub_to": {
+   "push_notification": {
+    "topic": "local:push_cmd_local"
+   }
+  }, 
   "sub_for": {
    "binary_event": {
     "topic": "mqtt:/dev/zw/75/bin_motion/1/events"
@@ -63,47 +67,36 @@
   "configs": {
    "alarm_state_timeout": 60
   }, 
-  "pub_to": {
-   "push_notification": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
+  "id": 17, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "ServoCam_v1", 
-  "alias": "ServoCam", 
-  "schedules": [], 
-  "comments": "Servo control through arduino", 
-  "id": 19, 
   "sub_for": {
-   "servo_command_local": {
-    "topic": "local:servocam"
-   }, 
    "servo_command_msg": {
     "topic": "mqtt:/app/servocam/commands"
+   }, 
+   "servo_command_local": {
+    "topic": "local:servocam"
    }
   }, 
-  "state": 0, 
   "error": "[Errno 2] No such file or directory: '/dev/cu.usbmodem1411'", 
+  "comments": "Servo control through arduino", 
+  "pub_to": {}, 
+  "alias": "ServoCam", 
+  "state": 0, 
+  "schedules": [], 
   "configs": {
    "api_key": ""
   }, 
-  "pub_to": {}, 
+  "id": 19, 
   "auto_startup": "STOP"
  }, 
  {
   "app_full_name": "FlowerWatering_v1", 
   "alias": "WateringPump1", 
   "comments": "", 
-  "pub_to": {
-   "watering_status": {
-    "topic": "local:watering_status_pump_1"
-   }, 
-   "pump_control_msg": {
-    "topic": "mqtt:/dev/zw/4/bin_switch/1/commands"
-   }
-  }, 
+  "id": 20, 
   "sub_for": {
    "start_msg": {
     "topic": "mqtt:/app/bf_watering_pump_1/commands"
@@ -114,12 +107,28 @@
   "configs": {
    "pump_on_duration": "4"
   }, 
-  "id": 20, 
+  "pub_to": {
+   "watering_status": {
+    "topic": "local:watering_status_pump_1"
+   }, 
+   "pump_control_msg": {
+    "topic": "mqtt:/dev/zw/4/bin_switch/1/commands"
+   }
+  }, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "SchedulerTest_v1", 
+  "sub_for": {}, 
+  "error": "unsupported type for timedelta seconds component: unicode", 
+  "comments": "", 
+  "pub_to": {
+   "push_notif_msg": {
+    "topic": "local:push_cmd_local"
+   }
+  }, 
   "alias": "SchedulerTest", 
+  "state": 0, 
   "schedules": [
    {
     "second": 5, 
@@ -127,17 +136,8 @@
     "trigger_type": "cron"
    }
   ], 
-  "comments": "", 
-  "id": 23, 
-  "sub_for": {}, 
-  "state": 0, 
-  "error": "unsupported type for timedelta seconds component: unicode", 
   "configs": {}, 
-  "pub_to": {
-   "push_notif_msg": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
+  "id": 23, 
   "auto_startup": "START"
  }
 ]

@@ -397,8 +397,12 @@ class AppManager:
         for app_config in self.app_instances_configs:
             if (instance_id is None or app_config["id"] == instance_id) and (
                         (is_system_startup == True and app_config["auto_startup"] == "START") or is_system_startup == False):
-                app_inst = self.app_classes[app_config["app_full_name"]](app_config["id"], app_config["alias"], app_config["sub_for"], app_config["pub_to"],
-                                                                         app_config["configs"])
+
+                app_full_name = app_config["app_full_name"]
+                if not(app_full_name in self.app_classes):
+                    self.load_new_app(app_full_name)
+
+                app_inst = self.app_classes[app_full_name](app_config["id"], app_config["alias"], app_config["sub_for"], app_config["pub_to"],app_config["configs"])
                 try:
                     app_inst.on_start()
                     # Add job to scheduler here
@@ -413,7 +417,7 @@ class AppManager:
                         self.scheduler.init_schedule(app_config,app_inst)
                     self.app_instances.append(app_inst)
                 except Exception as ex:
-                    log.error("App %s can be started of error ")
+                    log.error("App %s can't be started because of error ")
                     log.exception(ex)
                     app_config["state"] = AppInstanceState.STOPPED_WITH_ERROR
                     log.debug("App instance %s state was changed to STOPPED_WITH_ERROR" % app_config["alias"])
