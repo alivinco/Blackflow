@@ -67,7 +67,7 @@ class AppManager:
             with open(os.path.join(new_app_dir, "%s.py" % name), "w") as f:
                 f.write(app_template)
             # 4. writing application descriptor
-            descr_template = {"name": name, "version": version, "description": "", "sub_for": {}, "pub_to": {}, "configs": {}}
+            descr_template = {"name": name, "version": version,"developer":"alivinco", "description": "", "sub_for": {}, "pub_to": {}, "configs": {}}
             with open(os.path.join(new_app_dir, "manifest.json"), "w") as f:
                 f.write(json.dumps(descr_template))
             self.app_manifests.append(descr_template)
@@ -152,7 +152,7 @@ class AppManager:
         :param schedules:
         :param id: Application instance id
         :type id: int
-        :param app_full_name: Application full name = App name + version
+        :param app_full_name: Application full name = developer + App name + version
         :type app_full_name: string
         :param alias: Instance Alias
         :type alias: string
@@ -348,7 +348,8 @@ class AppManager:
 
         """
         for app_manif in self.app_manifests:
-                app_full_name = compose_app_full_name(app_manif["name"], app_manif["version"])
+                app_full_name = compose_app_full_name(app_manif["developer"],app_manif["name"], app_manif["version"])
+                log.debug("App %s class was loaded "%app_full_name)
                 self.load_app_class(app_full_name)
 
     def load_app_class(self, app_full_name):
@@ -360,7 +361,7 @@ class AppManager:
         log.info("Loading %s app descriptor and class" % app_full_name)
         try:
             # loading application class
-            app_name, version = split_app_full_name(app_full_name)
+            developer,app_name, version = split_app_full_name(app_full_name)
             imp_mod = importlib.import_module("apps.lib.%s.%s" % (app_full_name, app_name))
             app_class = getattr(imp_mod, app_name)
             app_class.context = self.context

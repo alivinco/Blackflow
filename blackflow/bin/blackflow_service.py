@@ -15,6 +15,7 @@ import logging, logging.config
 import blackflow.configs.log
 __author__ = 'alivinco'
 
+
 def sigterm_handler(signum, frame):
         log.info("Received signal #%d: %s. Shutting down service" % (signum, frame))
         service_manager.stop()

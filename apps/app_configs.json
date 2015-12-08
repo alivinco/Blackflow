@@ -1,6 +1,6 @@
 [
  {
-  "app_full_name": "PullCordSirenApp_v1", 
+  "app_full_name": "alivinco_nPullCordSirenApp_v1",
   "alias": "PullCordSirenAppTest", 
   "comments": "Pulcord app test", 
   "id": 15, 
@@ -26,7 +26,7 @@
   "auto_startup": "START"
  }, 
  {
-  "app_full_name": "Pushnotificator_v1", 
+  "app_full_name": "alivinco_nPushnotificator_v1",
   "alias": "Pushnotificator", 
   "comments": "", 
   "pub_to": {}, 
@@ -49,7 +49,7 @@
   "auto_startup": "START"
  }, 
  {
-  "app_full_name": "AlarmApp_v1", 
+  "app_full_name": "alivinco_nAlarmApp_v1",
   "alias": "AlarmApp", 
   "comments": "q", 
   "pub_to": {
@@ -71,7 +71,7 @@
   "auto_startup": "START"
  }, 
  {
-  "app_full_name": "ServoCam_v1", 
+  "app_full_name": "alivinco_nServoCam_v1",
   "sub_for": {
    "servo_command_msg": {
     "topic": "mqtt:/app/servocam/commands"
@@ -93,7 +93,7 @@
   "auto_startup": "STOP"
  }, 
  {
-  "app_full_name": "FlowerWatering_v1", 
+  "app_full_name": "alivinco_nFlowerWatering_v1",
   "alias": "WateringPump1", 
   "comments": "", 
   "id": 20, 
@@ -118,7 +118,7 @@
   "auto_startup": "START"
  }, 
  {
-  "app_full_name": "SchedulerTest_v1", 
+  "app_full_name": "alivinco_nSchedulerTest_v1",
   "sub_for": {}, 
   "error": "unsupported type for timedelta seconds component: unicode", 
   "comments": "", 

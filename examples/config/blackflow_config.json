@@ -1,3 +1,4 @@
 {"instance_config":{"name":"default"},
  "mqtt":{"host":"localhost","port":1883},
+ "blackflow_hub_api_uri":"http://localhost:8080/bfhub/api",
  "log_dir":"./"}

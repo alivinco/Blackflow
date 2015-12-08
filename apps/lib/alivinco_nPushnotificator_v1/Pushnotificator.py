@@ -1,5 +1,5 @@
 import logging
-from apps.lib.Pushnotificator_v1.pushover import Client , init
+from apps.lib.alivinco_nPushnotificator_v1.pushover import Client , init
 from blackflow.core.app import BfApp
 
 log = logging.getLogger(__name__)

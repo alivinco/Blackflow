@@ -1,6 +1,7 @@
 {
     "name":"Pushnotificator",
     "version":"1",
+    "developer":"alivinco",
     "sub_for":{"push_msg":{"msg_type":"command.notification.push","adapter":"mqtt","topic":"mqtt:/app/bf_pushnotificator/commands","descr":"Command to send a message"},
                "push_msg_local":{"msg_type":"command.notification.push","adapter":"local","topic":"local:push_msg_local"}},
     "pub_to" :{},
