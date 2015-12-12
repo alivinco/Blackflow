@@ -31,6 +31,7 @@ if __name__ == "__main__":
     blackflow.configs.log.config["handlers"]["info_file_handler"]["filename"] = os.path.join(configs["log_dir"],"blackflow_info.log")
     blackflow.configs.log.config["handlers"]["error_file_handler"]["filename"] = os.path.join(configs["log_dir"],"blackflow_error.log")
     logging.config.dictConfig(blackflow.configs.log.config)
+    configs["apps_dir_path"] = args.apps
 
     log = logging.getLogger("bf_service")
 
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     sys.path.append(args.apps.replace("apps",""))
     app_manager = AppManager(context,adapters,args.apps,configs=configs)
     rule_runner_service = AppRunner(context,adapters,app_manager)
-    api_mqtt_handler = ApiMqttHandler(app_manager,mqtt_adapter_service,context,instance_name)
+    api_mqtt_handler = ApiMqttHandler(app_manager,mqtt_adapter_service,context,instance_name,configs)
     mqtt_adapter_service.set_api_handler(api_mqtt_handler)
 
     service_manager.register(rule_runner_service)

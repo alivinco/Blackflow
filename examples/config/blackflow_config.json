@@ -1,5 +1,5 @@
 {"instance_config":{"name":"default"},
  "mqtt":{"host":"localhost","port":1883},
- "blackflow_hub_api_uri":"http://localhost:8080/bfhub/api",
+ "app_store_api_uri":"http://localhost:8080/bfhub/api",
  "username":"alivinco",
  "log_dir":"./"}

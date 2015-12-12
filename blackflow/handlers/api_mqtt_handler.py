@@ -2,6 +2,9 @@ import os
 import base64
 import logging
 from blackflow.libs import msg_template
+from libs.app_store import AppStore
+from libs.utils import split_app_full_name
+
 __author__ = 'alivinco'
 
 log = logging.getLogger(__name__)
@@ -9,18 +12,26 @@ log = logging.getLogger(__name__)
 
 class ApiMqttHandler:
 
-    def __init__(self,app_manager,mqtt_adapter,context,instance_name):
+    def __init__(self,app_manager,mqtt_adapter,context,instance_name,configs={}):
         self.sub_topic = "/app/blackflow/%s/commands"%instance_name
         self.pub_topic = "/app/blackflow/%s/events"%instance_name
         self.app_man = app_manager
         self.mqtt_adapter = mqtt_adapter
         self.context = context
+        self.configs = configs
+        self.app_store = AppStore(self.configs["app_store_api_uri"], self.configs["apps_dir_path"])
 
     def start(self):
         self.mqtt_adapter.subscribe(self.sub_topic)
 
     def stop(self):
         self.mqtt_adapter.unsubscribe(self.sub_topic)
+
+    def reply_with_status(self, code, description="", request_msg=None):
+        event_msg = msg_template.generate_msg_template("blackflow","event","status","code",request_msg)
+        event_msg["event"]["default"]["value"] = code
+        event_msg["event"]["properties"] = {"text":description}
+        self.mqtt_adapter.publish(self.pub_topic,event_msg)
 
     def route(self,topic,msg):
         msg_subtype = msg["command"]["subtype"]
@@ -122,6 +133,20 @@ class ApiMqttHandler:
                 app_name = msg["command"]["default"]["value"]
             elif msg_subtype == "upload_app":
                 pass
+        elif msg_type == "app_store":
+            if msg_subtype == "upload_app":
+                # default value = app_full_name
+                app_id, err = self.app_store.pack_and_upload_app(msg["command"]["default"]["value"])
+                if not err:
+                    self.reply_with_status(200, "app_id="+app_id, msg)
+                else:
+                    log.error("App can't be aploaded because of error %s"%err)
+                    self.reply_with_status(500, err, msg)
+
+            elif msg_subtype == "download_app":
+                app_full_name = self.app_store.download_and_unpack_app(msg["command"]["default"]["value"])
+                self.app_man.load_app_manifest(app_full_name)
+                self.reply_with_status(200, "app_full_name="+app_full_name, msg)
 
         elif msg_type == "file":
             if msg_subtype == "download":

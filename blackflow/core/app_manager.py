@@ -26,7 +26,7 @@ class AppInstanceState:
 class AppManager:
     # application states
 
-    def __init__(self, context, adapters, apps_dir_path,configs = {}):
+    def __init__(self, context, adapters, apps_dir_path, configs ={}):
         self.apps_dir_path = apps_dir_path
         self.app_instances = []
         self.app_classes = {}
@@ -285,7 +285,7 @@ class AppManager:
             app_inst = self.get_app_instance_obj(instance_id=instance_id)
             try:
                 app_inst.on_start()
-                log.info("Reesuming paused application instance ,instance id = %s" % instance_id)
+                log.info("Resuming paused application instance ,instance id = %s" % instance_id)
                 for key, subsc in app_inst.sub_for.iteritems():
                     for adapter in self.adapters:
                         adapter.subscribe(subsc["topic"])

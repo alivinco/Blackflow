@@ -3,16 +3,15 @@ import zipfile
 import requests
 import logging
 
-from libs.utils import compose_app_full_name
+from libs.utils import compose_app_full_name, split_app_full_name
 
 log = logging.getLogger("bf_app_store")
 
 
 class AppStore:
-    def __init__(self, app_store_uri="http://localhost:8080/bfhub/api", apps_dir_path="./", temp_path="./"):
+    def __init__(self, app_store_uri="http://localhost:8080/bfhub/api", apps_dir_path="./"):
         self.app_store_uri = app_store_uri
         self.apps_dir_path = apps_dir_path
-        self.temp_path = temp_path
 
     @staticmethod
     def zip_dir(dir_path=None, zip_file_path=None, include_dir_in_zip=True):
@@ -76,30 +75,57 @@ class AppStore:
         with zipfile.ZipFile(zip_file, "r") as zp:
             zp.extractall(dest_dir)
 
-    def pack_and_send_app(self, developer, app_name, version):
-        app_meta = self.get_app_by_full_name(developer, app_name, version)
+    @staticmethod
+    def download_file(url,local_file_path):
+        # NOTE the stream=True parameter
+        r = requests.get(url, stream=True)
+        with open(local_file_path, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+                    #f.flush() commented by recommendation from J.F.Sebastian
+        return "saved"
+
+    def pack_and_upload_app(self, app_full_name):
+        developer,app_name,version = split_app_full_name(app_full_name)
+        app_full_name = compose_app_full_name(developer, app_name, version)
+        tmp_file_path = os.path.join(self.apps_dir_path, app_full_name+".zip")
+        app_dir = os.path.join(self.apps_dir_path, "lib", app_full_name)
+        if not os.path.exists(app_dir):
+            return None, "App %s can't be found "%app_full_name
+
+        app_meta = self.get_app_by_full_name(developer, app_name, float(version))
         if app_meta:
             app_id = app_meta["id"]
         else:
             log.info("App doesn't exist in app store . Adding to app store")
-            app_id = self.register_app(developer, app_name, version)
+            app_id = self.register_app(developer, app_name, float(version))
 
         if app_id:
-            app_full_name = compose_app_full_name(developer, app_name, version)
-            tmp_file_path = os.path.join(self.temp_path, app_full_name+".zip")
-            app_dir = os.path.join(self.apps_dir_path, "lib", app_full_name)
             AppStore.zip_dir(app_dir, tmp_file_path)
             log.debug("App was saved to %s" % tmp_file_path)
-            r_status = self.send_file_to_app_store(app_id, tmp_file_path)
+            r_status = self.upload_file_to_app_store(app_id, tmp_file_path)
             if r_status == 200:
                 log.info("App was uploaded successfully to AppStore")
+                return app_id, None
             else:
                 log.error("App upload process failed")
+                return None , "App store api returned status = %"%r_status
         else:
             log.error("App registration failed because of error")
-        return r_status
+            return None , "Can't get app_id"
 
-    def send_file_to_app_store(self, app_id, file_path):
+    def download_and_unpack_app(self, app_id):
+        app_meta = self.get_app_by_id(app_id)
+        tmp_file_path = os.path.join(self.apps_dir_path, app_meta["file"])
+        log.info("Downloading app file %s from app store "%app_meta["file"])
+        self.download_file(self.app_store_uri+"/file/"+app_id, tmp_file_path)
+        AppStore.unzip_dir(tmp_file_path,os.path.join(self.apps_dir_path,"lib"))
+        os.remove(tmp_file_path)
+        log.info("App %s was successfully downloaded and installed "%app_meta["file"])
+        return compose_app_full_name(app_meta["developer"], app_meta["app_name"], app_meta["version"])
+
+    def upload_file_to_app_store(self, app_id, file_path):
         data = {"id": app_id}
         file = {'file': open(file_path, 'rb')}
         r = requests.post(self.app_store_uri + "/file", data=data, files=file)
@@ -118,8 +144,13 @@ class AppStore:
         else:
             return None
 
+    def get_app_by_id(self, app_id):
+        r = requests.get(self.app_store_uri + "/app/"+app_id)
+        return r.json()
+
     def register_app(self, developer, app_name, version):
-        new_app = {"app_name": app_name, "developer": developer, "version": version}
+        new_app = {"app_name": app_name, "developer": developer, "version": float(version)}
+        log.debug("Registering new app %s"%new_app)
         r = requests.post(self.app_store_uri + "/app", json=new_app)
         if r.status_code == 200:
             return r.json()["app_id"]
@@ -132,6 +163,15 @@ if __name__ == "__main__":
     # unzip_dir("../../apps/lib/AlarmApp_v1.zip","../../apps/AlarmApp_v1")
     ast = AppStore("http://localhost:8080/bfhub/api", apps_dir_path="../../apps")
     # print ast.get_app_by_full_name("alivinco", "WebTest6", 2.2)["id"]
-    print ast.pack_and_send_app("alivinco", "ServoCam", 1)
+
+    #print ast.pack_and_upload_app("alivinco", "ServoCam", 1)
+
+    print ast.pack_and_upload_app("alivinco_nAppStoreTester_v1.1")
+    #ast.download_and_unpack_app("566c935ba08b4fadf6d46763")
+
     # AppStore.zip_dir("../../apps/lib/alivinco_nAlarmApp_v1")
-    # ast.send_file_to_app_store("565c2411f8f87822daebe850","../../apps/lib/AlarmApp_v1.zip")
+    # ast.upload_file_to_app_store("565c2411f8f87822daebe850","../../apps/lib/AlarmApp_v1.zip")
+    # ast.upload_file_to_app_store("565c2411f8f87822daebe850","../../apps/lib/AlarmApp_v1.zip")
+    # AppStore.download_file("http://localhost:8080/bfhub/api/file/56614b02f8f87822daebe854","../../apps/DeviceTypes_SDS11847-8.pdf")
+    # AppStore.download_file("http://localhost:8080/bfhub/api/file/566c4dc0a08b4fadf6d46760","../../apps/alivinco_nServoCam_v1.zip")
+    # AppStore.unzip_dir("../../apps/alivinco_nServoCam_v1.zip","../../apps")
