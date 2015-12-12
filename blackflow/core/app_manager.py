@@ -8,6 +8,7 @@ import json
 import os
 import logging
 import shutil
+
 __author__ = 'alivinco'
 log = logging.getLogger("bf_app_manager")
 
@@ -25,7 +26,7 @@ class AppInstanceState:
 class AppManager:
     # application states
 
-    def __init__(self, context, adapters, apps_dir_path):
+    def __init__(self, context, adapters, apps_dir_path,configs = {}):
         self.apps_dir_path = apps_dir_path
         self.app_instances = []
         self.app_classes = {}
@@ -38,6 +39,7 @@ class AppManager:
         self.instances_config_lock = Lock()
         self.scheduler = AppScheduler()
         self.scheduler.init_scheduler()
+        self.configs = configs
         # self.configure_and_init_app_instance()
         log.info("App init process completed. %s apps were initialized and configured " % len(self.app_instances))
 
@@ -53,7 +55,7 @@ class AppManager:
         :param name:
         :param version:
         """
-        app_full_name = "%s_v%s" % (name, version)
+        app_full_name = compose_app_full_name(self.configs["username"],name, version)
         new_app_dir = os.path.join(self.apps_dir_path, "lib", app_full_name)
         if not os.path.exists(new_app_dir):
             # 1. creating application folder
@@ -67,7 +69,7 @@ class AppManager:
             with open(os.path.join(new_app_dir, "%s.py" % name), "w") as f:
                 f.write(app_template)
             # 4. writing application descriptor
-            descr_template = {"name": name, "version": version,"developer":"alivinco", "description": "", "sub_for": {}, "pub_to": {}, "configs": {}}
+            descr_template = {"name": name, "version": version,"developer":self.configs["username"], "description": "", "sub_for": {}, "pub_to": {}, "configs": {}}
             with open(os.path.join(new_app_dir, "manifest.json"), "w") as f:
                 f.write(json.dumps(descr_template))
             self.app_manifests.append(descr_template)
@@ -235,9 +237,9 @@ class AppManager:
         self.app_manifests.append(json.load(file(os.path.join(self.apps_dir_path, 'lib', app_full_name, "manifest.json"))))
 
     def get_app_manifest(self, app_full_name):
-        app_name, version = split_app_full_name(app_full_name)
+        developer,app_name, version = split_app_full_name(app_full_name)
         try:
-            return filter(lambda app_manif: app_manif["name"] == app_name and app_manif["version"] == version, self.app_manifests)[0]
+            return filter(lambda app_manif:app_manif["developer"] == developer and app_manif["name"] == app_name and app_manif["version"] == version, self.app_manifests)[0]
         except:
             return None
 

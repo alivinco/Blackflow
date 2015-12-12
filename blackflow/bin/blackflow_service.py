@@ -23,7 +23,7 @@ def sigterm_handler(signum, frame):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-c','--conf', help='Config file path')
-    parser.add_argument('-a','--apps', help='Folder to store apps')
+    parser.add_argument('-a','--apps', help='Apps storage folder')
     args = parser.parse_args()
     with open(args.conf, "r") as app_file:
                     configs = json.loads(app_file.read())
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     mqtt_adapter_service = MqttAdapter(context,instance_name,client_id=instance_name,host=configs["mqtt"]["host"],port=configs["mqtt"]["port"])
     adapters.append(mqtt_adapter_service)
     sys.path.append(args.apps.replace("apps",""))
-    app_manager = AppManager(context,adapters,args.apps)
+    app_manager = AppManager(context,adapters,args.apps,configs=configs)
     rule_runner_service = AppRunner(context,adapters,app_manager)
     api_mqtt_handler = ApiMqttHandler(app_manager,mqtt_adapter_service,context,instance_name)
     mqtt_adapter_service.set_api_handler(api_mqtt_handler)
