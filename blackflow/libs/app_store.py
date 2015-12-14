@@ -119,7 +119,7 @@ class AppStore:
         app_meta = self.get_app_by_id(app_id)
         tmp_file_path = os.path.join(self.apps_dir_path, app_meta["file"])
         log.info("Downloading app file %s from app store "%app_meta["file"])
-        self.download_file(self.app_store_uri+"/file/"+app_id, tmp_file_path)
+        self.download_file(self.app_store_uri+"/apps/file/"+app_id, tmp_file_path)
         AppStore.unzip_dir(tmp_file_path,os.path.join(self.apps_dir_path,"lib"))
         os.remove(tmp_file_path)
         log.info("App %s was successfully downloaded and installed "%app_meta["file"])
@@ -128,7 +128,7 @@ class AppStore:
     def upload_file_to_app_store(self, app_id, file_path):
         data = {"id": app_id}
         file = {'file': open(file_path, 'rb')}
-        r = requests.post(self.app_store_uri + "/file", data=data, files=file)
+        r = requests.post(self.app_store_uri + "/apps/file", data=data, files=file)
         if r.status_code == 200:
             log.info("App %s was sent to app store successfully" % file_path)
             os.remove(file_path)
@@ -138,20 +138,20 @@ class AppStore:
             return r.status_code
 
     def get_app_by_full_name(self, developer, app_name, version):
-        r = requests.get(self.app_store_uri + "/app_by_full_name", params={"developer": developer, "app_name": app_name, "version": version})
+        r = requests.get(self.app_store_uri + "/apps/by_full_name", params={"developer": developer, "app_name": app_name, "version": version})
         if r.status_code == 200:
             return r.json()
         else:
             return None
 
     def get_app_by_id(self, app_id):
-        r = requests.get(self.app_store_uri + "/app/"+app_id)
+        r = requests.get(self.app_store_uri + "/apps/id/"+app_id)
         return r.json()
 
     def register_app(self, developer, app_name, version):
         new_app = {"app_name": app_name, "developer": developer, "version": float(version)}
         log.debug("Registering new app %s"%new_app)
-        r = requests.post(self.app_store_uri + "/app", json=new_app)
+        r = requests.post(self.app_store_uri + "/apps", json=new_app)
         if r.status_code == 200:
             return r.json()["app_id"]
         else:
