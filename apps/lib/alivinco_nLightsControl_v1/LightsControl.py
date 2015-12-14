@@ -3,10 +3,11 @@ from blackflow.core.app import BfApp
 
 log = logging.getLogger("LightsControl")
 
+
 class LightsControl(BfApp):
     name = "LightsControl"
 
-    def run(self,triggered_by):
+    def on_message(self,triggered_by):
         # self.publish("/dev/zw/75/bin_switch/1/commands","binary.switch",True)
         log.info("LightControll app was triggered by %s"%triggered_by)
         if self.self.var_get(triggered_by)["event"]["default"]["value"]:

@@ -19,7 +19,7 @@ class SchedulerTest(BfApp):
         """
         pass
 
-     def run(self,triggered_by):
+     def on_message(self,triggered_by):
          """
           The method is invoked every time variable from sub_for section is changed (sub_for section in app config)
          """

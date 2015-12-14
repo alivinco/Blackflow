@@ -73,7 +73,7 @@ Application folder structure :
          """
            The method is invoked during app shutdown . Do all cleanup work here  
          """    
-         def run(self,triggered_by):
+         def on_message(self,triggered_by):
          """
           The method is invoked every time variable from sub_for section is changed (sub_for section in app config) 
          """

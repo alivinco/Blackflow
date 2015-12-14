@@ -5,13 +5,14 @@ from blackflow.core.app import BfApp
 
 log = logging.getLogger("FlowerWatering")
 
+
 class FlowerWatering(BfApp):
     name = "FlowerWatering"
 
     def on_start(self):
         pass
 
-    def run(self,triggered_by):
+    def on_message(self,triggered_by):
         log.info("%s app was triggered by %s"%(self.name,triggered_by))
         log.info("Turning pump ON t")
         self.publish("pump_control_msg", self.pump_control(True))

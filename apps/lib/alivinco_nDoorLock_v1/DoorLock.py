@@ -6,9 +6,11 @@ log = logging.getLogger("DoorLock")
 
 class DoorLock(BfApp):
     name = __name__
+
     def on_start(self):
         pass
-    def run(self,triggered_by):
+
+    def on_message(self,triggered_by):
         log.info("%s app was triggered by %s"%(self.name,triggered_by))
         msg = self.var_get(triggered_by)
         if "command" in msg :

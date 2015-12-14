@@ -4,12 +4,13 @@ from blackflow.core.app import BfApp
 
 log = logging.getLogger("PullCordSirenApp")
 
+
 class PullCordSirenApp(BfApp):
     name = __name__
     def on_start(self):
         self.is_alarms_situation = False
 
-    def run(self,triggered_by):
+    def on_message(self,triggered_by):
         log.info("%s app was triggered by %s"%(self.name,triggered_by))
         situation = self.var_get(triggered_by)["event"]["default"]["value"]
         if situation == "medical" and not self.is_alarms_situation:

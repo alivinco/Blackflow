@@ -18,7 +18,7 @@ class ServoCam(BfApp):
         self.pins = {}
         self.pins[addr] = self.board.get_pin('d:%s:s'%addr)
 
-    def run(self,triggered_by):
+    def on_message(self,triggered_by):
         log.info("%s app was triggered by %s"%(self.name,triggered_by))
         msg = self.var_get(triggered_by)["command"]
         value = msg["default"]["value"]

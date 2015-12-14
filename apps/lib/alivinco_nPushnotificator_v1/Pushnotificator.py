@@ -6,13 +6,14 @@ log = logging.getLogger(__name__)
 
 from pushbullet import PushBullet
 
+
 class Pushnotificator(BfApp):
     name = __name__
 
     def on_start(self):
         init(self.config_get("pushover_app_token"))
 
-    def run(self,triggered_by):
+    def on_message(self,triggered_by):
         log.info("%s app was triggered by %s"%(self.name,triggered_by))
         msg = self.var_get(triggered_by)["command"]["properties"]
         transport = msg["transport"] if "transport" in msg else None

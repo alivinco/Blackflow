@@ -14,7 +14,7 @@ class AlarmApp(BfApp):
 
         log.info("Initializing alarm app")
 
-    def run(self,triggered_by):
+    def on_message(self,triggered_by):
         log.info("%s app was triggered by %s"%(self.name,triggered_by))
         trigger_value = self.var_get(triggered_by)["command"]["default"]["value"]
         elapsed_time = self.context.get_time_since_last_update("local:alarm_state")
