@@ -1,5 +1,18 @@
-{"instance_config":{"name":"default"},
- "mqtt":{"host":"localhost","port":1883},
- "app_store_api_uri":"http://localhost:8080/bfhub/api",
- "username":"alivinco",
- "log_dir":"./"}
+{
+  "instance_config": {
+    "name": "default"
+  },
+  "mqtt": {
+    "topic_prefix":"",
+    "host": "localhost",
+    "port": 1883,
+    "username":"",
+    "password":""
+  },
+  "app_store":{
+    "api_url":"http://localhost:8080/bfhub/api",
+    "username":"alivinco",
+    "password":""
+  },
+  "log_dir": "./"
+}

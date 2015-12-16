@@ -3,7 +3,6 @@ import base64
 import logging
 from blackflow.libs import msg_template
 from libs.app_store import AppStore
-from libs.utils import split_app_full_name
 
 __author__ = 'alivinco'
 
@@ -19,7 +18,7 @@ class ApiMqttHandler:
         self.mqtt_adapter = mqtt_adapter
         self.context = context
         self.configs = configs
-        self.app_store = AppStore(self.configs["app_store_api_uri"], self.configs["apps_dir_path"])
+        self.app_store = AppStore(self.configs["app_store"]["api_url"], self.configs["apps_dir_path"])
 
     def start(self):
         self.mqtt_adapter.subscribe(self.sub_topic)
@@ -86,15 +85,18 @@ class ApiMqttHandler:
                 schedules = msg["command"]["properties"]["schedules"]
 
                 id = self.app_man.configure_app_instance(inst_id,app_full_name,alias,sub_for,pub_to,configs,comments,schedules=schedules)
+                self.reply_with_status(200, str(id), msg)
                 # self.app_man.reload_app_instance(id)
 
             elif msg_subtype == "delete_app":
                 app_full_name = msg["command"]["default"]["value"]
                 self.app_man.delete_app(app_full_name)
+                self.reply_with_status(200, "", msg)
 
             elif msg_subtype == "delete_app_instance":
                 inst_id = int(msg["command"]["default"]["value"])
                 self.app_man.delete_app_instance(inst_id)
+                self.reply_with_status(200, "", msg)
 
             elif msg_subtype == "control_app_instance":
                 inst_id = int(msg["command"]["default"]["value"])
@@ -105,6 +107,7 @@ class ApiMqttHandler:
                     self.app_man.pause_app_instance(inst_id)
                 if action == "STOP":
                     self.app_man.stop_app_instance(inst_id)
+                self.reply_with_status(200, "", msg)
 
             elif msg_subtype == "get_apps":
                 msg = msg_template.generate_msg_template("blackflow","event","blackflow","apps")

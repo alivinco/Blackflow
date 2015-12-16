@@ -322,7 +322,7 @@ class AppManager:
         :param app_full_name:
         """
         log.info("Reloading app module %s" % app_full_name)
-        app_name, version = split_app_full_name(app_full_name)
+        developer, app_name, version = split_app_full_name(app_full_name)
         mod_ref = sys.modules["apps.lib.%s.%s" % (app_full_name, app_name)]
         reload_success = False
         try:

@@ -1,8 +1,0 @@
-{
-    "name":"LightsControl",
-    "version":"1",
-    "developer":"alivinco",
-    "sub_for":{"motion_sensor":{},"light_sensor":{}},
-    "pub_to" :{"switch":{}},
-    "configs":["param1"]
-}

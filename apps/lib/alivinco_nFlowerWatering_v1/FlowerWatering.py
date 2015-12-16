@@ -12,8 +12,8 @@ class FlowerWatering(BfApp):
     def on_start(self):
         pass
 
-    def on_message(self,triggered_by):
-        log.info("%s app was triggered by %s"%(self.name,triggered_by))
+    def on_message(self,topic,msg):
+        log.info("%s app was triggered by %s"%(self.name,topic))
         log.info("Turning pump ON t")
         self.publish("pump_control_msg", self.pump_control(True))
         time.sleep(int(self.config_get("pump_on_duration")))

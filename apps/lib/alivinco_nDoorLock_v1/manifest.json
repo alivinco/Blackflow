@@ -1,8 +1,0 @@
-{
-    "name":"DoorLock",
-    "version":"1",
-    "developer":"alivinco",
-    "sub_for":{"pull_cord":{"adapter":"mqtt","msg_type":"command.binary.switch","dev_type":"bin_switch","descr":""}},
-    "pub_to" :{"lock_control":{"adapter":"mqtt","msg_type":"command.binary.lock","dev_type":"bin_lock","descr":"Command to control lock"}},
-    "configs":[]
-}

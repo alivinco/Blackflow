@@ -11,7 +11,8 @@ mqtt messages becomes key value pare
 
 """
 
-log = logging.getLogger("bf_rule")
+log = logging.getLogger("bf_app")
+
 
 class BfApp:
     name = "app_name"
@@ -29,6 +30,18 @@ class BfApp:
     def get_id(self):
         return self.id
 
+    def on_install(self):
+        """
+        Invoked once after app installation . Can be used to init application resources
+        """
+        pass
+
+    def on_uninstall(self):
+        """
+        Invoked once before app uninstall  . Can be used to clean up application resources
+        """
+        pass
+
     def on_start(self):
         """
         Invoked by app manager on app startup. Initialize app level variables here.
@@ -41,7 +54,7 @@ class BfApp:
         """
         pass
 
-    def run(self,triggered_by):
+    def on_message(self, topic, msg):
         """
         The method is triggered by context change and is executed within it's own thread .
         :type triggered_by: variable name which has triggered app execution . If call was intiated by adapter it will
@@ -60,6 +73,9 @@ class BfApp:
 
     def config_get(self,name):
         return self.configs[name]
+
+    def get_pubs(self):
+        return self.pub_to
 
 
 

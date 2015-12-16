@@ -5,8 +5,10 @@ log = logging.getLogger(__name__)
 
 import pyfirmata
 
+
 class ServoCam(BfApp):
     name = __name__
+
     def on_start(self):
         """
 
@@ -18,9 +20,9 @@ class ServoCam(BfApp):
         self.pins = {}
         self.pins[addr] = self.board.get_pin('d:%s:s'%addr)
 
-    def on_message(self,triggered_by):
-        log.info("%s app was triggered by %s"%(self.name,triggered_by))
-        msg = self.var_get(triggered_by)["command"]
+    def on_message(self,topic,msg):
+        log.info("%s app was triggered by %s"%(self.name,topic))
+        msg = msg["command"]
         value = msg["default"]["value"]
         servo_addr = int(msg["properties"]["address"])
         self.pins[servo_addr].write(int(value))

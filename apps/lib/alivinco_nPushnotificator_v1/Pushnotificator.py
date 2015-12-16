@@ -13,9 +13,9 @@ class Pushnotificator(BfApp):
     def on_start(self):
         init(self.config_get("pushover_app_token"))
 
-    def on_message(self,triggered_by):
-        log.info("%s app was triggered by %s"%(self.name,triggered_by))
-        msg = self.var_get(triggered_by)["command"]["properties"]
+    def on_message(self,topic,msg):
+        log.info("%s app was triggered by %s"%(self.name,topic))
+        msg = msg["command"]["properties"]
         transport = msg["transport"] if "transport" in msg else None
         if transport == "pushbullet":
             self.pushbullet_msg_to_device(msg["title"],msg["body"],msg["address"])
