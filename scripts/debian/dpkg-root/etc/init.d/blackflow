@@ -5,7 +5,7 @@ APP=blackflow
 DIR=/usr/lib/${APP}
 DAEMON=/usr/lib/${APP}/blackflow_service.py
 DAEMON_NAME=${APP}
-DAEMON_OPTS="-c /etc/blackflow/blackflow_config.json -a /var/blackflow/apps"
+DAEMON_OPTS="-c /etc/blackflow/blackflow_config.json -a /var/lib/blackflow/apps"
 PYTHON_BIN=/usr/bin/python
 PARAMETERS=$@
 

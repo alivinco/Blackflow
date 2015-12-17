@@ -10,7 +10,7 @@
     "password":""
   },
   "app_store":{
-    "api_url":"http://localhost:8080/bfhub/api",
+    "api_url":"http://lego.fiicha.net/bfhub/api",
     "username":"alivinco",
     "password":""
   },
