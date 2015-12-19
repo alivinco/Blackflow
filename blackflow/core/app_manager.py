@@ -35,7 +35,7 @@ class AppManager:
         self.app_instances_configs = []
         self.context = context
         self.adapters = adapters
-        self.instances_config_file = os.path.join(self.apps_dir_path, "app_configs.json")
+        self.instances_config_file = os.path.join(self.apps_dir_path,"data",configs["instance_config"]["name"]+"_app_configs.json")
         self.instances_config_lock = Lock()
         self.scheduler = AppScheduler()
         self.scheduler.init_scheduler()
@@ -49,13 +49,15 @@ class AppManager:
         self.load_all_app_classes()
         self.configure_and_init_app_instance(is_system_startup=True)
 
-    def init_new_app(self, name, version=""):
+    def init_new_app(self, developer, name, version=""):
         """
         The method initializes new app by creating app folder , app file and descriptor
         :param name:
         :param version:
+        :param developer
         """
-        app_full_name = compose_app_full_name(self.configs["username"],name, version)
+        version = str(version)
+        app_full_name = compose_app_full_name(developer, name, version)
         new_app_dir = os.path.join(self.apps_dir_path, "lib", app_full_name)
         if not os.path.exists(new_app_dir):
             # 1. creating application folder
@@ -69,7 +71,7 @@ class AppManager:
             with open(os.path.join(new_app_dir, "%s.py" % name), "w") as f:
                 f.write(app_template)
             # 4. writing application descriptor
-            descr_template = {"name": name, "version": version,"developer":self.configs["username"], "description": "", "sub_for": {}, "pub_to": {}, "configs": {}}
+            descr_template = {"name": name, "version": version,"developer": developer, "description": "", "sub_for": {}, "pub_to": {}, "configs": {}}
             with open(os.path.join(new_app_dir, "manifest.json"), "w") as f:
                 f.write(json.dumps(descr_template))
             self.app_manifests.append(descr_template)

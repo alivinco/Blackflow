@@ -18,7 +18,7 @@ class ApiMqttHandler:
         self.mqtt_adapter = mqtt_adapter
         self.context = context
         self.configs = configs
-        self.app_store = AppStore(self.configs["app_store"]["api_url"], self.configs["apps_dir_path"])
+        # self.app_store = AppStore(self.configs["app_store"]["api_url"], self.configs["apps_dir_path"])
 
     def start(self):
         self.mqtt_adapter.subscribe(self.sub_topic)
@@ -49,7 +49,7 @@ class ApiMqttHandler:
                self.app_man.load_app_class(msg["command"]["default"]["value"])
 
             if msg_subtype == "init_new_app":
-               success , warn_msg = self.app_man.init_new_app(msg["command"]["default"]["value"],msg["command"]["properties"]["version"])
+               success , warn_msg = self.app_man.init_new_app(msg["command"]["properties"]["developer"],msg["command"]["default"]["value"],msg["command"]["properties"]["version"])
                event_msg = msg_template.generate_msg_template("blackflow","event","status","code",msg)
                if not success :
                    event_msg["event"]["default"]["value"] = 500
@@ -139,7 +139,10 @@ class ApiMqttHandler:
         elif msg_type == "app_store":
             if msg_subtype == "upload_app":
                 # default value = app_full_name
-                app_id, err = self.app_store.pack_and_upload_app(msg["command"]["default"]["value"])
+                app_store_server = msg["command"]["properties"]["app_store_url"]
+                app_store_token = msg["command"]["properties"]["sec_token"]
+                app_store = AppStore(app_store_server, self.configs["apps_dir_path"])
+                app_id, err = app_store.pack_and_upload_app(msg["command"]["default"]["value"])
                 if not err:
                     self.reply_with_status(200, "app_id="+app_id, msg)
                 else:
@@ -147,7 +150,10 @@ class ApiMqttHandler:
                     self.reply_with_status(500, err, msg)
 
             elif msg_subtype == "download_app":
-                app_full_name = self.app_store.download_and_unpack_app(msg["command"]["default"]["value"])
+                app_store_server = msg["command"]["properties"]["app_store_url"]
+                app_store_token = msg["command"]["properties"]["sec_token"]
+                app_store = AppStore(app_store_server, self.configs["apps_dir_path"])
+                app_full_name = app_store.download_and_unpack_app(msg["command"]["default"]["value"])
                 self.app_man.load_app_manifest(app_full_name)
                 self.reply_with_status(200, "app_full_name="+app_full_name, msg)
 

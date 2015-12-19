@@ -1,0 +1,1 @@
+{"description":"","sub_for":{"trigger":{"adapter":"mqtt","msg_type":"","dev_type":"","descr":"","topic":"mqtt:/app/any/test"}},"version":"1","configs":[],"developer":"alivinco","pub_to":{},"name":"PersistanceTester"}

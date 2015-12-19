@@ -62,8 +62,8 @@ class BfApp:
         """
         raise NotImplementedError()
 
-    def var_set(self,name,value):
-        self.context.set(name,value,self)
+    def var_set(self, name, value, persist=False):
+        self.context.set(name, value, self, persist=persist)
 
     def var_get(self,name):
         return self.context.get(name)

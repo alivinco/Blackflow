@@ -9,10 +9,5 @@
     "username":"",
     "password":""
   },
-  "app_store":{
-    "api_url":"http://lego.fiicha.net/bfhub/api",
-    "username":"alivinco",
-    "password":""
-  },
   "log_dir": "/var/log/blackflow"
 }

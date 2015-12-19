@@ -40,7 +40,8 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, sigterm_handler)
     adapters = []
     log.info("Starting application.Blackflow instance name = %s"%instance_name)
-    context = BfContext()
+    storage_file = os.path.join(args.apps,"data",instance_name+".db")
+    context = BfContext(storage_path=storage_file)
 
     mqtt_adapter_service = MqttAdapter(context,instance_name,client_id=instance_name,host=configs["mqtt"]["host"],port=configs["mqtt"]["port"])
     adapters.append(mqtt_adapter_service)
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     app_manager.start_apps()
     api_mqtt_handler.start()
 
-    while service_manager.getState()==ServiceState.RUN:
+    while service_manager.getState() == ServiceState.RUN:
         time.sleep(1)
     if not service_manager.waitShutdown(10):
         log.error("Service Manager was not able to shut down all services in time. Unclean Shutdown !!!")

@@ -20,6 +20,7 @@ class MqttAdapter(Adapter):
         self.api_handler = None
         self.api_sub = "/app/blackflow/%s/commands"%instance_name
         self.api_pub = "/app/blackflow/%s/events"%instance_name
+        self.alias = "mqtt"
 
     def set_connection_params(self, hostname, port=1883):
         self.hostname = hostname

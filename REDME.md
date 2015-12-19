@@ -51,6 +51,13 @@ Application folder structure :
 + User can send START , STOP  , PAUSE commands .
 + Each application instance has auto_startup parameter with can take value START , STOP , PAUSE
 
+#### Supported mehods :
+
++ self.var_set(variable name,value,persist) - Example self.var_set("alarm_state","armed",True)
++ self.var_get(name)
++ self.publish(topic_name,value) - topic_name is name configured in interface , it isn't address 
++ self.config_get(name)
++ self.get_pubs() - returns dict of all publish interfaces . Normally it is used to iterate over all interfaces .
 
 ### Simple app example : 
 

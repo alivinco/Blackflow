@@ -3,6 +3,7 @@ APP=blackflow
 
 # Create directory
 mkdir -p /var/lib/blackflow/apps/lib 2>/dev/null || :
+mkdir -p /var/lib/blackflow/apps/data 2>/dev/null || :
 mkdir -p /var/log/blackflow/ 2>/dev/null || :
 touch /var/lib/blackflow/apps/__init__.py
 touch /var/lib/blackflow/apps/lib/__init__.py

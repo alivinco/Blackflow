@@ -3,7 +3,7 @@
   "app_full_name": "alivinco_nPushnotificator_v1", 
   "alias": "Pushnotificator", 
   "comments": "", 
-  "id": 16, 
+  "pub_to": {}, 
   "sub_for": {
    "push_cmd": {
     "topic": "mqtt:/app/bf_pushnotificator/commands"
@@ -19,14 +19,18 @@
    "pushbullet_api_key": "hu0vF5lqHtfr9jAS9eBeabfOnCvjeCy2", 
    "pushover_client_id": "uFMfKKZTvx9Phh8ctzRzUHUyYYwGtX"
   }, 
-  "pub_to": {}, 
+  "id": 16, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "alivinco_nAlarmApp_v1", 
   "alias": "AlarmApp", 
   "comments": "q", 
-  "id": 17, 
+  "pub_to": {
+   "push_notification": {
+    "topic": "local:push_cmd_local"
+   }
+  }, 
   "sub_for": {
    "binary_event": {
     "topic": "mqtt:/dev/zw/75/bin_motion/1/events"
@@ -37,47 +41,36 @@
   "configs": {
    "alarm_state_timeout": 60
   }, 
-  "pub_to": {
-   "push_notification": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
+  "id": 17, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "alivinco_nServoCam_v1", 
-  "alias": "ServoCam", 
-  "schedules": [], 
-  "comments": "Servo control through arduino", 
-  "id": 19, 
   "sub_for": {
-   "servo_command_local": {
-    "topic": "local:servocam"
-   }, 
    "servo_command_msg": {
     "topic": "mqtt:/app/servocam/commands"
+   }, 
+   "servo_command_local": {
+    "topic": "local:servocam"
    }
   }, 
-  "state": 0, 
   "error": "[Errno 2] No such file or directory: '/dev/cu.usbmodem1411'", 
+  "comments": "Servo control through arduino", 
+  "pub_to": {}, 
+  "alias": "ServoCam", 
+  "state": 0, 
+  "schedules": [], 
   "configs": {
    "api_key": ""
   }, 
-  "pub_to": {}, 
+  "id": 19, 
   "auto_startup": "STOP"
  }, 
  {
   "app_full_name": "alivinco_nFlowerWatering_v1", 
   "alias": "WateringPump1", 
   "comments": "", 
-  "pub_to": {
-   "watering_status": {
-    "topic": "local:watering_status_pump_1"
-   }, 
-   "pump_control_msg": {
-    "topic": "mqtt:/dev/zw/4/bin_switch/1/commands"
-   }
-  }, 
+  "id": 20, 
   "sub_for": {
    "start_msg": {
     "topic": "mqtt:/app/bf_watering_pump_1/commands"
@@ -88,12 +81,28 @@
   "configs": {
    "pump_on_duration": "4"
   }, 
-  "id": 20, 
+  "pub_to": {
+   "watering_status": {
+    "topic": "local:watering_status_pump_1"
+   }, 
+   "pump_control_msg": {
+    "topic": "mqtt:/dev/zw/4/bin_switch/1/commands"
+   }
+  }, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "alivinco_nSchedulerTest_v1", 
+  "sub_for": {}, 
+  "error": "unsupported type for timedelta seconds component: unicode", 
+  "comments": "", 
+  "pub_to": {
+   "push_notif_msg": {
+    "topic": "local:push_cmd_local"
+   }
+  }, 
   "alias": "SchedulerTest", 
+  "state": 3, 
   "schedules": [
    {
     "second": 5, 
@@ -101,23 +110,23 @@
     "trigger_type": "cron"
    }
   ], 
-  "comments": "", 
-  "id": 23, 
-  "sub_for": {}, 
-  "state": 3, 
-  "error": "unsupported type for timedelta seconds component: unicode", 
   "configs": {}, 
-  "pub_to": {
-   "push_notif_msg": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
+  "id": 23, 
   "auto_startup": "START"
  }, 
  {
   "app_full_name": "alivinco_nBinarySwitchOneToMany_v1", 
   "alias": "Multi1stLights", 
   "comments": "Multiswitch first floor lights control", 
+  "id": 27, 
+  "sub_for": {
+   "Binary_event_topic": {
+    "topic": "mqtt:/dev/zw/99/bin_switch/1/events"
+   }
+  }, 
+  "state": 3, 
+  "schedules": [], 
+  "configs": {}, 
   "pub_to": {
    "Binary_command_topic": {
     "topic": "mqtt:/dev/zw/100/bin_switch/1/commands"
@@ -129,15 +138,22 @@
     "topic": "mqtt:/dev/zw/101/bin_switch/1/commands"
    }
   }, 
+  "auto_startup": "START"
+ }, 
+ {
+  "app_full_name": "alivinco_nPersistanceTester_v1", 
   "sub_for": {
-   "Binary_event_topic": {
-    "topic": "mqtt:/dev/zw/99/bin_switch/1/events"
+   "trigger": {
+    "topic": "mqtt:/app/any/test/commands"
    }
   }, 
-  "state": 3, 
+  "comments": "", 
+  "id": 28, 
+  "alias": "PesistanceTester", 
+  "state": 0, 
   "schedules": [], 
   "configs": {}, 
-  "id": 27, 
+  "pub_to": {}, 
   "auto_startup": "START"
  }
 ]
