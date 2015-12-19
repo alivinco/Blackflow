@@ -2,7 +2,7 @@ import os
 import base64
 import logging
 from blackflow.libs import msg_template
-from libs.app_store import AppStore
+from blackflow.libs.app_store import AppStore
 
 __author__ = 'alivinco'
 

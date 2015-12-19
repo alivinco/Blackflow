@@ -3,7 +3,7 @@ import zipfile
 import requests
 import logging
 
-from libs.utils import compose_app_full_name, split_app_full_name
+from blackflow.libs.utils import compose_app_full_name, split_app_full_name
 
 log = logging.getLogger("bf_app_store")
 
