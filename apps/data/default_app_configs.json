@@ -23,28 +23,6 @@
   "auto_startup": "START"
  }, 
  {
-  "app_full_name": "alivinco_nAlarmApp_v1", 
-  "alias": "AlarmApp", 
-  "comments": "q", 
-  "pub_to": {
-   "push_notification": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
-  "sub_for": {
-   "binary_event": {
-    "topic": "mqtt:/dev/zw/75/bin_motion/1/events"
-   }
-  }, 
-  "state": 3, 
-  "schedules": [], 
-  "configs": {
-   "alarm_state_timeout": 60
-  }, 
-  "id": 17, 
-  "auto_startup": "START"
- }, 
- {
   "app_full_name": "alivinco_nServoCam_v1", 
   "sub_for": {
    "servo_command_msg": {
@@ -105,9 +83,10 @@
   "state": 3, 
   "schedules": [
    {
-    "second": 5, 
-    "name": "ping", 
-    "trigger_type": "cron"
+    "seconds": 5, 
+    "minutes": 1, 
+    "name": "test", 
+    "trigger_type": "interval"
    }
   ], 
   "configs": {}, 
@@ -142,15 +121,15 @@
  }, 
  {
   "app_full_name": "alivinco_nPersistanceTester_v1", 
+  "alias": "PesistanceTester", 
+  "comments": "", 
+  "id": 28, 
   "sub_for": {
    "trigger": {
     "topic": "mqtt:/app/any/test/commands"
    }
   }, 
-  "comments": "", 
-  "id": 28, 
-  "alias": "PesistanceTester", 
-  "state": 0, 
+  "state": 3, 
   "schedules": [], 
   "configs": {}, 
   "pub_to": {}, 

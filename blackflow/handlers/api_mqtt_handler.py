@@ -12,21 +12,32 @@ log = logging.getLogger(__name__)
 class ApiMqttHandler:
 
     def __init__(self,app_manager,mqtt_adapter,context,instance_name,configs={}):
+        self.discovery_sub_topic = "/discovery/commands"
+        self.discovery_pub_topic = "/discovery/events"
         self.sub_topic = "/app/blackflow/%s/commands"%instance_name
         self.pub_topic = "/app/blackflow/%s/events"%instance_name
         self.app_man = app_manager
         self.mqtt_adapter = mqtt_adapter
         self.context = context
         self.configs = configs
+        self.instance_name = instance_name
         # self.app_store = AppStore(self.configs["app_store"]["api_url"], self.configs["apps_dir_path"])
 
     def start(self):
+        self.mqtt_adapter.subscribe(self.discovery_sub_topic)
         self.mqtt_adapter.subscribe(self.sub_topic)
 
     def stop(self):
         self.mqtt_adapter.unsubscribe(self.sub_topic)
+        self.mqtt_adapter.subscribe(self.discovery_sub_topic)
 
     def reply_with_status(self, code, description="", request_msg=None):
+        """
+        Generates unified confirmation reply-event to received command
+        :param code: result code
+        :param description: result description
+        :param request_msg: request message , is used to extract request uuid and use it as correlation id (corr_id)
+        """
         event_msg = msg_template.generate_msg_template("blackflow","event","status","code",request_msg)
         event_msg["event"]["default"]["value"] = code
         event_msg["event"]["properties"] = {"text":description}
@@ -36,8 +47,19 @@ class ApiMqttHandler:
         msg_subtype = msg["command"]["subtype"]
         msg_type = msg["command"]["@type"]
         log.info("New blackflow api call type=%s subtype=%s"%(msg_type,msg_subtype))
+        if msg_type == "discovery":
+            if msg_subtype == "query":
+                msg = msg_template.generate_msg_template("blackflow","event","discovery","response",msg)["event"]
+                app_full_name = "/app/blackflow/%s"%self.instance_name
+                msg["default"]["value"] = app_full_name
+                msg["properties"] = {"type": "app" ,
+                                     "name": app_full_name ,
+                                     "desc": "Lightweight application container",
+                                     "sdk" : "py_blackflow_v1",
+                                     "services": [{"uri":self.sub_topic},{"uri":self.pub_topic}]}
+                self.mqtt_adapter.publish(self.discovery_pub_topic, msg)
 
-        if msg_type == "blackflow":
+        elif msg_type == "blackflow":
             if msg_subtype == "reload_app" :
                success,error = self.app_man.reload_app(msg["command"]["default"]["value"])
                msg = msg_template.generate_msg_template("blackflow","event","blackflow","reload_app",msg)

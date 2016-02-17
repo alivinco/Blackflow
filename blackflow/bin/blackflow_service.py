@@ -43,7 +43,7 @@ if __name__ == "__main__":
     storage_file = os.path.join(args.apps,"data",instance_name+".db")
     context = BfContext(storage_path=storage_file)
 
-    mqtt_adapter_service = MqttAdapter(context,instance_name,client_id=instance_name,host=configs["mqtt"]["host"],port=configs["mqtt"]["port"])
+    mqtt_adapter_service = MqttAdapter(context,instance_name,client_id="blackflow_"+instance_name,host=configs["mqtt"]["host"],port=configs["mqtt"]["port"])
     adapters.append(mqtt_adapter_service)
     sys.path.append(args.apps.replace("apps",""))
     app_manager = AppManager(context,adapters,args.apps,configs=configs)

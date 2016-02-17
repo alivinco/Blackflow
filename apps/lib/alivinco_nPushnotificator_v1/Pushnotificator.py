@@ -12,7 +12,14 @@ class Pushnotificator(BfApp):
 
     def on_start(self):
         init(self.config_get("pushover_app_token"))
-
+    '''
+    Msg has folowing properties :
+     transport - "pushbullet" or "pushover"
+     title - message title 
+     body - message body
+     address - specific device , not in use so far 
+    
+    '''
     def on_message(self,topic,msg):
         log.info("%s app was triggered by %s"%(self.name,topic))
         msg = msg["command"]["properties"]

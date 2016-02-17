@@ -77,5 +77,8 @@ class BfApp:
     def get_pubs(self):
         return self.pub_to
 
+    def get_subs(self):
+        return self.sub_for
+
 
 
