@@ -1,0 +1,1 @@
+{"description":"Denon AVR technology adapter","sub_for":{"power_ctrl":{"adapter":"mqtt","msg_type":"binary.switch","dev_type":"bin_switch","descr":"denon avr power controll","topic":"mqtt:/dev/denon_avr/bin_switch/1/commands"}},"version":"1","configs":["avr_address","avr_port"],"developer":"alivinco","pub_to":{},"name":"DenonAvrTA"}

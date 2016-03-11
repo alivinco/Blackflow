@@ -70,30 +70,6 @@
   "auto_startup": "START"
  }, 
  {
-  "app_full_name": "alivinco_nSchedulerTest_v1", 
-  "sub_for": {}, 
-  "error": "unsupported type for timedelta seconds component: unicode", 
-  "comments": "", 
-  "pub_to": {
-   "push_notif_msg": {
-    "topic": "local:push_cmd_local"
-   }
-  }, 
-  "alias": "SchedulerTest", 
-  "state": 3, 
-  "schedules": [
-   {
-    "seconds": 5, 
-    "minutes": 1, 
-    "name": "test", 
-    "trigger_type": "interval"
-   }
-  ], 
-  "configs": {}, 
-  "id": 23, 
-  "auto_startup": "START"
- }, 
- {
   "app_full_name": "alivinco_nBinarySwitchOneToMany_v1", 
   "alias": "Multi1stLights", 
   "comments": "Multiswitch first floor lights control", 
@@ -120,19 +96,47 @@
   "auto_startup": "START"
  }, 
  {
-  "app_full_name": "alivinco_nPersistanceTester_v1", 
-  "alias": "PesistanceTester", 
+  "app_full_name": "alivinco_nDenonAvrTA_v1", 
+  "alias": "DenonAvrLiving", 
   "comments": "", 
-  "id": 28, 
+  "pub_to": {}, 
   "sub_for": {
-   "trigger": {
-    "topic": "mqtt:/app/any/test/commands"
+   "power_ctrl": {
+    "topic": "mqtt:/dev/denon_avr/bin_switch/1/commands"
    }
   }, 
-  "state": 3, 
+  "state": 0, 
   "schedules": [], 
-  "configs": {}, 
-  "pub_to": {}, 
+  "configs": {
+   "avr_port": "23", 
+   "avr_address": "denon.st"
+  }, 
+  "id": 29, 
+  "auto_startup": "START"
+ }, 
+ {
+  "app_full_name": "alivinco_nSceneController_v1", 
+  "sub_for": {
+   "scene_activator": {
+    "topic": "mqtt:/dev/zw/4/bin_switch/1/events"
+   }
+  }, 
+  "comments": "", 
+  "id": 30, 
+  "alias": "SceneTest", 
+  "state": 0, 
+  "schedules": [], 
+  "configs": {
+   "inverted_topics": "test_sw1;"
+  }, 
+  "pub_to": {
+   "test_sw2": {
+    "topic": "mqtt:/dev/zw/5/bin_switch/2/commands"
+   }, 
+   "test_sw1": {
+    "topic": "mqtt:/dev/zw/5/bin_switch/1/commands"
+   }
+  }, 
   "auto_startup": "START"
  }
 ]
