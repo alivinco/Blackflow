@@ -18,8 +18,8 @@ class MqttAdapter(Adapter):
         self.hostname = host
         self.port = port
         self.api_handler = None
-        self.api_sub = "/app/blackflow/%s/commands"%instance_name
-        self.api_pub = "/app/blackflow/%s/events"%instance_name
+        self.api_sub = ["/app/blackflow/%s/commands"%instance_name,"/discovery/commands"]
+        self.api_pub = ["/app/blackflow/%s/events"%instance_name,"/discovery/events"]
         self.alias = "mqtt"
 
     def set_connection_params(self, hostname, port=1883):
@@ -34,7 +34,7 @@ class MqttAdapter(Adapter):
             topic = topic.replace(self.adapter_prefix, "")
             log.info("Mqtt adapter subscribing for topic = %s" % topic)
             self.mqtt.subscribe(str(topic), qos=1)
-        elif self.api_sub == topic:
+        elif topic in self.api_sub:
             log.info("Mqtt adapter subscribing for topic = %s" % topic)
             self.mqtt.subscribe(str(topic), qos=1)
 
@@ -43,10 +43,13 @@ class MqttAdapter(Adapter):
             topic = topic.replace(self.adapter_prefix, "")
             log.info("Unsubscribing from topic = %s"%topic)
             self.mqtt.unsubscribe(str(topic))
+        elif topic in self.api_sub:
+            log.info("Mqtt adapter unsubscribing from topic = %s" % topic)
+            self.mqtt.unsubscribe(str(topic))
 
     def on_message(self, client, userdata, msg):
         jmsg = json.loads(msg.payload)
-        if self.api_sub == msg.topic:
+        if msg.topic in self.api_sub:
             try:
                 self.api_handler.route(msg.topic, jmsg)
             except Exception as ex:
@@ -58,7 +61,7 @@ class MqttAdapter(Adapter):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
             self.mqtt.publish(topic, json.dumps(msg), qos=1)
-        elif self.api_pub == topic:
+        elif topic in self.api_pub:
             self.mqtt.publish(topic, json.dumps(msg), qos=1)
 
     def initialize(self):

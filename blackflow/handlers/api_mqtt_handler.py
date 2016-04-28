@@ -41,7 +41,7 @@ class ApiMqttHandler:
         event_msg.set_corr_id_from_iotmsg(request_msg)
         event_msg.set_default(code)
         event_msg.set_properties({"text": description})
-        self.mqtt_adapter.publish(self.pub_topic, event_msg)
+        self.mqtt_adapter.publish(self.pub_topic, event_msg.get_dict())
 
     def route(self, topic, msg):
         msg = IotMsg.new_iot_msg_from_dict("blackflow",msg)
@@ -50,16 +50,17 @@ class ApiMqttHandler:
         msg_subtype = msg.get_msg_subclass()
         log.info("New blackflow api call type=%s subtype=%s" % (msg_type, msg_subtype))
         if msg_type == "discovery":
-            if msg_subtype == "query":
-                resp_msg = IotMsg.new_iot_msg("blackflow", "event", "discovery", "response")
+            if msg_subtype == "find":
+                resp_msg = IotMsg.new_iot_msg("blackflow", "event", "discovery", "report")
                 resp_msg.set_corr_id_from_iotmsg(msg)
                 app_full_name = "/app/blackflow/%s" % self.instance_name
                 resp_msg.set_default(app_full_name)
                 resp_msg.set_properties({"type": "app",
-                                         "name": app_full_name,
-                                         "desc": "Lightweight application container",
+                                         "name": "blackflow",
+                                         "uri": app_full_name,
                                          "sdk": "py_blackflow_v1",
-                                         "ip_addr": "127.0.0.1"
+                                         "ip": "127.0.0.1",
+                                         "props": {"container_id": self.instance_name}
                                          })
 
                 self.mqtt_adapter.publish(self.discovery_pub_topic, resp_msg.get_dict())
@@ -220,6 +221,7 @@ class ApiMqttHandler:
                     app_file.write(bin_data)
                 if post_save_action == "reload_manifest":
                     self.app_man.load_app_manifests()
+                self.reply_with_status(200, "", msg)
 
 
         elif msg_type == "config":
