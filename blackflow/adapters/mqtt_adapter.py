@@ -1,3 +1,5 @@
+from libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
+
 __author__ = 'alivinco'
 import json
 import logging
@@ -48,21 +50,28 @@ class MqttAdapter(Adapter):
             self.mqtt.unsubscribe(str(topic))
 
     def on_message(self, client, userdata, msg):
-        jmsg = json.loads(msg.payload)
+        """
+        On new message .
+        :param client:
+        :param userdata:
+        :param msg:
+        :return IotMsg
+        """
+        iot_msg = IotMsgConverter.string_to_iot_msg(msg.topic, msg.payload)
         if msg.topic in self.api_sub:
             try:
-                self.api_handler.route(msg.topic, jmsg)
+                self.api_handler.route(msg.topic, iot_msg)
             except Exception as ex:
                 log.exception(ex)
         else:
-            self.context.set(self.adapter_prefix + msg.topic, jmsg, src_name=self, src_type="adapter")
+            self.context.set(self.adapter_prefix + msg.topic, iot_msg, src_name=self, src_type="adapter")
 
-    def publish(self, topic, msg):
+    def publish(self, topic, iot_msg):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
-            self.mqtt.publish(topic, json.dumps(msg), qos=1)
+            self.mqtt.publish(topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
         elif topic in self.api_pub:
-            self.mqtt.publish(topic, json.dumps(msg), qos=1)
+            self.mqtt.publish(topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
 
     def initialize(self):
         self.mqtt.connect(self.hostname, self.port)

@@ -2,7 +2,7 @@ import os
 import base64
 import logging
 from blackflow.libs.app_store import AppStore
-from libs.iot_msg import IotMsg
+from libs.iot_msg_lib.iot_msg import MsgType, IotMsg
 
 __author__ = 'alivinco'
 
@@ -37,22 +37,19 @@ class ApiMqttHandler:
         :param description: result description
         :param request_msg: request message , is used to extract request uuid and use it as correlation id (corr_id)
         """
-        event_msg = IotMsg.new_iot_msg("blackflow", "event", "status", "code")
-        event_msg.set_corr_id_from_iotmsg(request_msg)
+        event_msg = IotMsg("blackflow", MsgType.EVT, "status", "code", req_msg=request_msg)
         event_msg.set_default(code)
         event_msg.set_properties({"text": description})
-        self.mqtt_adapter.publish(self.pub_topic, event_msg.get_dict())
+        self.mqtt_adapter.publish(self.pub_topic, event_msg)
 
-    def route(self, topic, msg):
-        msg = IotMsg.new_iot_msg_from_dict("blackflow",msg)
+    def route(self, topic, iot_msg):
 
-        msg_type = msg.get_msg_class()
-        msg_subtype = msg.get_msg_subclass()
+        msg_type = iot_msg.get_msg_class()
+        msg_subtype = iot_msg.get_msg_subclass()
         log.info("New blackflow api call type=%s subtype=%s" % (msg_type, msg_subtype))
         if msg_type == "discovery":
             if msg_subtype == "find":
-                resp_msg = IotMsg.new_iot_msg("blackflow", "event", "discovery", "report")
-                resp_msg.set_corr_id_from_iotmsg(msg)
+                resp_msg = IotMsg("blackflow", MsgType.EVT , "discovery", "report", req_msg=iot_msg)
                 app_full_name = "/app/blackflow/%s" % self.instance_name
                 resp_msg.set_default(app_full_name)
                 resp_msg.set_properties({"type": "app",
@@ -63,44 +60,38 @@ class ApiMqttHandler:
                                          "props": {"container_id": self.instance_name}
                                          })
 
-                self.mqtt_adapter.publish(self.discovery_pub_topic, resp_msg.get_dict())
+                self.mqtt_adapter.publish(self.discovery_pub_topic, resp_msg)
 
         elif msg_type == "blackflow":
             if msg_subtype == "reload_app":
-                success, error = self.app_man.reload_app(msg.get_default_value())
-                resp_msg = IotMsg.new_iot_msg("blackflow", "event", "blackflow", "reload_app")
-                resp_msg.set_corr_id_from_iotmsg(msg)
+                success, error = self.app_man.reload_app(iot_msg.get_default_value())
+                resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "reload_app", req_msg=iot_msg)
                 resp_msg.set_default(success)
                 resp_msg.set_properties({"error": error})
-                self.mqtt_adapter.publish(self.pub_topic, resp_msg.get_dict())
+                self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
             if msg_subtype == "load_app_class":
-                self.app_man.load_app_class(msg.get_default_value())
+                self.app_man.load_app_class(iot_msg.get_default_value())
 
             if msg_subtype == "init_new_app":
-                props = msg.get_properties()
-                success, warn_msg = self.app_man.init_new_app(props["developer"], msg.get_default_value(),props["version"])
-                event_msg = IotMsg.new_iot_msg("blackflow", "event", "status", "code")
-                event_msg.set_corr_id_from_iotmsg(msg)
+                props = iot_msg.get_properties()
+                success, warn_msg = self.app_man.init_new_app(props["developer"], iot_msg.get_default_value(), props["version"])
                 if not success:
-                    event_msg.set_default(500)
-                    event_msg.set_properties({"text": warn_msg})
+                    self.reply_with_status(500,warn_msg,iot_msg)
                 else:
-                    event_msg.set_default(200)
-                self.mqtt_adapter.publish(self.pub_topic, event_msg.get_dict())
+                    self.reply_with_status(200,warn_msg,iot_msg)
 
             elif msg_subtype == "reload_app_instance":
-                self.app_man.reload_app_instance(msg.get_default_value())
-                resp_msg = IotMsg.new_iot_msg("blackflow", "event","blackflow", "reload_app_instance")
-                resp_msg.set_corr_id_from_iotmsg(msg)
+                self.app_man.reload_app_instance(iot_msg.get_default_value())
+                resp_msg = IotMsg("blackflow", MsgType.EVT,"blackflow", "reload_app_instance",req_msg=iot_msg)
                 resp_msg.set_properties({"error": ""})
                 resp_msg.set_default(True)
-                self.mqtt_adapter.publish(self.pub_topic, resp_msg.get_dict())
+                self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
             elif msg_subtype == "control_app":
                 pass
             elif msg_subtype == "add_app":
-                props = msg.get_properties()
+                props = iot_msg.get_properties()
                 app_name = props["name"]
                 sub_for = props["sub_for"]
                 pub_to = props["pub_to"]
@@ -108,7 +99,7 @@ class ApiMqttHandler:
                 src = props["src"]
 
             elif msg_subtype == "configure_app_instance":
-                props = msg.get_properties()
+                props = iot_msg.get_properties()
                 inst_id = props["id"]
                 app_full_name = props["app_full_name"]
                 alias = props["alias"]
@@ -119,53 +110,55 @@ class ApiMqttHandler:
                 schedules = props["schedules"]
 
                 id = self.app_man.configure_app_instance(inst_id, app_full_name, alias, sub_for, pub_to, configs, comments, schedules=schedules)
-                self.reply_with_status(200, str(id), msg)
+                self.reply_with_status(200, str(id), iot_msg)
                 # self.app_man.reload_app_instance(id)
 
             elif msg_subtype == "delete_app":
                 # deafult value - app full name
-                self.app_man.delete_app(msg.get_default_value())
-                self.reply_with_status(200, "", msg)
+                self.app_man.delete_app(iot_msg.get_default_value())
+                self.reply_with_status(200, "", iot_msg)
 
             elif msg_subtype == "delete_app_instance":
                 # default value - app_instance
-                self.app_man.delete_app_instance(msg.get_default_value())
-                self.reply_with_status(200, "", msg)
+                self.app_man.delete_app_instance(iot_msg.get_default_value())
+                self.reply_with_status(200, "", iot_msg)
 
             elif msg_subtype == "control_app_instance":
-                inst_id = int(msg.get_default_value())
-                action = msg.get_properties()["action"]
+                inst_id = int(iot_msg.get_default_value())
+                action = iot_msg.get_properties()["action"]
                 if action == "START":
                     self.app_man.start_app_instance(inst_id)
                 elif action == "PAUSE":
                     self.app_man.pause_app_instance(inst_id)
                 if action == "STOP":
                     self.app_man.stop_app_instance(inst_id)
-                self.reply_with_status(200, "", msg)
+                self.reply_with_status(200, "", iot_msg)
 
             elif msg_subtype == "get_apps":
-                resp_msg = IotMsg.new_iot_msg("blackflow", "event", "blackflow", "apps")
-                resp_msg.set_corr_id_from_iotmsg(msg)
+                resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "apps", req_msg=iot_msg)
                 resp_msg.set_properties({"apps": self.app_man.get_app_manifests()})
-                self.mqtt_adapter.publish(self.pub_topic, resp_msg.get_dict())
+                self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
             elif msg_subtype == "get_app_instances":
-                resp_msg = IotMsg.new_iot_msg("blackflow", "event", "blackflow", "app_instances")
-                resp_msg.set_corr_id_from_iotmsg(msg)
+                resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "app_instances", req_msg=iot_msg)
                 resp_msg.set_properties({"app_instances": self.app_man.get_app_configs()})
-                self.mqtt_adapter.publish(self.pub_topic, resp_msg.get_dict())
+                self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
             elif msg_subtype == "context_get":
-                resp_msg = IotMsg.new_iot_msg("blackflow", "event", "blackflow", "context")
-                resp_msg.set_corr_id_from_iotmsg(msg)
-                resp_msg.set_properties(self.context.get_dict())
-                self.mqtt_adapter.publish(self.pub_topic, resp_msg.get_dict())
+                resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "context", req_msg=iot_msg)
+                result = self.context.get_dict()
+                for k , v in result.iteritems():
+                    if isinstance(v["value"],IotMsg) :
+                        v["value"] = str(v["value"])
+                    # result[k]=v
+
+                resp_msg.set_properties(result)
+                self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
             elif msg_subtype == "analytics_get":
-                resp_msg = IotMsg.new_iot_msg("blackflow", "event", "blackflow", "analytics")
-                resp_msg.set_corr_id_from_iotmsg(msg)
+                resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "analytics" ,req_msg=iot_msg)
                 resp_msg.set_properties({"link_counters": self.context.analytics.get_all_link_counters()})
-                self.mqtt_adapter.publish(self.pub_topic, resp_msg.get_dict())
+                self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
             elif msg_subtype == "context_set":
                 pass
@@ -176,41 +169,40 @@ class ApiMqttHandler:
         elif msg_type == "app_store":
             if msg_subtype == "upload_app":
                 # default value = app_full_name
-                props = msg.get_properties()
+                props = iot_msg.get_properties()
                 app_store_server = props["app_store_url"]
                 app_store_token = props["sec_token"]
                 app_store = AppStore(app_store_server, self.configs["apps_dir_path"])
-                app_id, err = app_store.pack_and_upload_app(msg.get_default_value())
+                app_id, err = app_store.pack_and_upload_app(iot_msg.get_default_value())
                 if not err:
-                    self.reply_with_status(200, "app_id=" + app_id, msg)
+                    self.reply_with_status(200, "app_id=" + app_id, iot_msg)
                 else:
                     log.error("App can't be aploaded because of error %s" % err)
-                    self.reply_with_status(500, err, msg)
+                    self.reply_with_status(500, err, iot_msg)
 
             elif msg_subtype == "download_app":
-                props = msg.get_properties()
+                props = iot_msg.get_properties()
                 app_store_server = props["app_store_url"]
                 app_store_token = props["sec_token"]
                 app_store = AppStore(app_store_server, self.configs["apps_dir_path"])
-                app_full_name = app_store.download_and_unpack_app(msg.get_default_value())
+                app_full_name = app_store.download_and_unpack_app(iot_msg.get_default_value())
                 self.app_man.load_app_manifest(app_full_name)
-                self.reply_with_status(200, "app_full_name=" + app_full_name, msg)
+                self.reply_with_status(200, "app_full_name=" + app_full_name, iot_msg)
 
         elif msg_type == "file":
             if msg_subtype == "download":
                 # absolute path to app directory
-                file_name = msg.get_default_value()
+                file_name = iot_msg.get_default_value()
                 full_path = os.path.join(self.app_man.apps_dir_path, "lib", file_name)
                 with open(full_path, "rb") as app_file:
                     bin_data = base64.b64encode(app_file.read())
-                resp_msg = IotMsg.new_iot_msg("blackflow", "event", "file", "download")
-                resp_msg.set_corr_id_from_iotmsg(msg)
+                resp_msg = IotMsg("blackflow", MsgType.EVT, "file", "download", req_msg=iot_msg)
                 resp_msg.set_default(file_name)
                 resp_msg.set_properties({"bin_data":bin_data})
-                self.mqtt_adapter.publish(self.pub_topic, resp_msg.get_dict())
+                self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
             if msg_subtype == "upload":
-                props = msg.get_properties()
+                props = iot_msg.get_properties()
                 name = props["name"]
                 type = props["type"]
                 data = props["bin_data"]
@@ -221,7 +213,7 @@ class ApiMqttHandler:
                     app_file.write(bin_data)
                 if post_save_action == "reload_manifest":
                     self.app_man.load_app_manifests()
-                self.reply_with_status(200, "", msg)
+                self.reply_with_status(200, "", iot_msg)
 
 
         elif msg_type == "config":

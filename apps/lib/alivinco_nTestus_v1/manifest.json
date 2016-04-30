@@ -1,1 +1,1 @@
-{"description":"testus","sub_for":{},"version":"1","configs":[],"developer":"alivinco","pub_to":{},"name":"Testus"}
+{"description":"","sub_for":{"testus_sub":{"adapter":"mqtt","msg_type":"binary.switch","dev_type":"","descr":"","topic":"mqtt:/app/testus/commands"}},"version":"1","configs":[],"developer":"alivinco","pub_to":{"siren_control":{"adapter":"mqtt","msg_type":"","dev_type":"","descr":"siren controll","topic":"mqtt:/ta/virt/tst/bin_switch/1/command"}},"name":"Testus"}

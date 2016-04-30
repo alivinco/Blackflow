@@ -47,7 +47,7 @@ def get_timestamp():
 
 
 class IotMsg:
-    def __init__(self, origin, msg_type=MsgType.CMD, msg_class=None, msg_subclass=None, timestamp=get_timestamp(), uuid_=get_uuid(),corid=None):
+    def __init__(self, origin, msg_type=MsgType.CMD, msg_class=None, msg_subclass=None, timestamp=get_timestamp(), uuid_=get_uuid(), corid=None, req_msg=None):
         self.origin = origin
         self.msg_type = msg_type
         self.msg_class = msg_class
@@ -58,6 +58,8 @@ class IotMsg:
         self.timestamp = timestamp
         self.uuid = uuid_
         self.corid = corid
+        if req_msg:
+            self.corid = req_msg.get_uuid()
 
     def get_type(self):
         return self.msg_type
