@@ -12,7 +12,7 @@
     "topic": "local:push_cmd_local"
    }
   }, 
-  "state": 3, 
+  "state": 0, 
   "schedules": [], 
   "configs": {
    "pushover_app_token": "ap2d7Ru4y1hYJJw1zzP3MnZMGqzwx6", 
@@ -54,7 +54,7 @@
     "topic": "mqtt:/dev/zw/99/bin_switch/1/events"
    }
   }, 
-  "state": 3, 
+  "state": 0, 
   "schedules": [], 
   "configs": {}, 
   "pub_to": {
@@ -81,7 +81,7 @@
   "comments": "", 
   "pub_to": {}, 
   "alias": "DenonAvrLiving", 
-  "state": 1, 
+  "state": 0, 
   "error": "[Errno 61] Connection refused", 
   "configs": {
    "avr_port": "23", 
@@ -100,7 +100,7 @@
     "topic": "mqtt:/dev/zw/4/bin_switch/1/events"
    }
   }, 
-  "state": 3, 
+  "state": 0, 
   "schedules": [], 
   "configs": {
    "inverted_topics": "test_sw1;"
@@ -113,29 +113,6 @@
     "topic": "mqtt:/dev/zw/5/bin_switch/1/commands"
    }
   }, 
-  "auto_startup": "START"
- }, 
- {
-  "app_full_name": "alivinco_nTestus_v1", 
-  "alias": "testus", 
-  "comments": "", 
-  "pub_to": {
-   "push": {
-    "topic": "local:push_cmd_local"
-   }, 
-   "siren_control": {
-    "topic": "mqtt:/ta/virt/tst/bin_switch/1/command"
-   }
-  }, 
-  "sub_for": {
-   "testus_sub": {
-    "topic": "mqtt:/app/testus/commands"
-   }
-  }, 
-  "state": 0, 
-  "schedules": [], 
-  "configs": {}, 
-  "id": 31, 
   "auto_startup": "START"
  }
 ]

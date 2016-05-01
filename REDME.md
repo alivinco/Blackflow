@@ -61,41 +61,54 @@ Application folder structure :
 
 ### Simple app example : 
 
+    from blackflow.core.app import BfApp
+    from libs.iot_msg_lib.iot_msg import IotMsg, MsgType
     import logging
-    from libs.msg_template import generate_msg_template
-    from core.app import BfApp
+    log = logging.getLogger("BfApplicationTemplate")
+    
+    
+    class BfApplicationTemplate(BfApp):
+        name = __name__
+    
+        def on_install(self):
+            """
+            Invoked once after app installation . Can be used to init application resources
+            """
+            log.info("%s app was installed ")
+    
+        def on_uninstall(self):
+            """
+            Invoked once before app uninstall  . Can be used to clean up application resources
+            """
+            log.info("%s app was uninstalled ")
+    
+        def on_start(self):
+            """
+               The method is invoked once during app startup . Init all variables here
+            """
+            log.info("%s app was started ")
+    
+        def on_stop(self):
+            """
+               The method is invoked during app shutdown . Do all cleanup work here
+            """
+            log.info("%s app was stopped ")
+    
+        def on_message(self, topic, iot_msg):
+            """
+              The method is invoked every time variable from sub_for section is changed (sub_for section in app config)
+              :type topic: str
+              :param topic: full topic name which includes prefix as "local:" , "mqtt:" , etc .
+              :type iot_msg: libs.iot_msg_lib.iot_msg.IotMsg
+              :param iot_msg: IotMsg object
+             """
+            log.info("%s app was triggered by %s" % (self.name, topic))
+            situation = iot_msg.get_default_value()
+            log.info("Alarm situation %s"%situation)
+            # publish is a helper function for var_set.  First argument is publish destination alias and second is a payload
+            siren_cmd = IotMsg(self.name,MsgType.CMD,msg_class="binary",msg_subclass="switch")
+            self.publish("siren_control", siren_cmd)
+            self.var_set("is_alarms_situation", True,persist=True)
 
-    log = logging.getLogger("PullCordSirenApp")
 
-    class PullCordSirenApp(BfApp):
-         name = "PullCordSirenApp"
-         
-         def on_start(self):
-         """
-           The method is invoked once during app startup . Init all variables here 
-         """
-             self.var_set("is_alarms_situation", False )
-         
-         def on_stop():
-         """
-           The method is invoked during app shutdown . Do all cleanup work here  
-         """    
-         def on_message(self,topic,msg):
-         """
-          The method is invoked every time variable from sub_for section is changed (sub_for section in app config) 
-         """
-             log.info("%s app was triggered by %s"%(self.name,triggered_by))
-             situation = self.var_get(triggered_by)["event"]["default"]["value"]
-             if situation == "medical" and not self.var_get("is_alarms_situation"):
-                 # publish is a helper function for var_set.  First argument is publish destination alias and second is a payload    
-                 self.publish("siren_control", self.siren_control("chime"))
-                 self.publish("push_cmd_local",{"command":{"properties":{"title":"Emergency","body":"Cord has been pulled or button pressed ","address":""}}})
-                 self.var_set("is_alarms_situation",True)
-             elif situation == "cancel" or self.var_get("is_alarms_situation"):
-                 self.publish("push_cmd_local",{"command":{"properties":{"title":"Emergency cancel","body":"Everything is ok","address":""}}})
-                 self.var_set("is_alarms_situation",False)
-     
-         def siren_control(self,state):
-             msg = generate_msg_template(self.name,"command","mode","siren")
-             msg["command"]["default"]["value"] = state
-             return msg
+

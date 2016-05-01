@@ -11,25 +11,25 @@ class Testus(BfApp):
         """
         Invoked once after app installation . Can be used to init application resources
         """
-        log.info("%s app was installed ")
+        log.info("%s app was installed "%self.name)
 
     def on_uninstall(self):
         """
         Invoked once before app uninstall  . Can be used to clean up application resources
         """
-        log.info("%s app was uninstalled ")
+        log.info("%s app was uninstalled "%self.name)
 
     def on_start(self):
         """
            The method is invoked once during app startup . Init all variables here
         """
-        log.info("%s app was started ")
+        log.info("%s app was started "%self.name)
 
     def on_stop(self):
         """
            The method is invoked during app shutdown . Do all cleanup work here
         """
-        log.info("%s app was stopped ")
+        log.info("%s app was stopped "%self.name)
 
     def on_message(self, topic, iot_msg):
         """

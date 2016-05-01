@@ -1,7 +1,6 @@
 import logging
 from apps.lib.alivinco_nPushnotificator_v1.pushover import Client , init
 from blackflow.core.app import BfApp
-
 log = logging.getLogger(__name__)
 
 from pushbullet import PushBullet
@@ -20,9 +19,9 @@ class Pushnotificator(BfApp):
      address - specific device , not in use so far 
     
     '''
-    def on_message(self,topic,msg):
+    def on_message(self,topic,iot_msg):
         log.info("%s app was triggered by %s"%(self.name,topic))
-        msg = msg["command"]["properties"]
+        msg = iot_msg.get_properties()
         transport = msg["transport"] if "transport" in msg else None
         if transport == "pushbullet":
             self.pushbullet_msg_to_device(msg["title"],msg["body"],msg["address"])

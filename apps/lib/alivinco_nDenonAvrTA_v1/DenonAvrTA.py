@@ -1,4 +1,3 @@
-from blackflow.libs.msg_template import generate_msg_template
 from blackflow.core.app import BfApp
 import socket
 import logging
@@ -40,13 +39,13 @@ class DenonAvrTA(BfApp):
         self.sock.close()
         log.info("App disconnected from Denon AVR")
 
-    def on_message(self, topic, msg):
+    def on_message(self, topic, iot_msg):
         """
           The method is invoked every time variable from sub_for section is changed (sub_for section in app config)
          """
         log.info("%s app was triggered by %s" % (self.name, topic))
 
-        state = msg["command"]["default"]["value"]
+        state = iot_msg.get_default_value()
         if state :
            cmd = "PWON\r"
         else:

@@ -1,4 +1,4 @@
-from blackflow.libs.msg_template import generate_msg_template
+from libs.iot_msg_lib.iot_msg import IotMsg, MsgType
 from blackflow.core.app import BfApp
 import logging
 log = logging.getLogger("SceneController")
@@ -34,18 +34,19 @@ class SceneController(BfApp):
         """
         log.info("%s app was stopped ")
 
-    def on_message(self, topic, msg):
+    def on_message(self, topic, iot_msg):
         """
           The method is invoked every time variable from sub_for section is changed (sub_for section in app config)
          """
         log.info("%s app was triggered by %s" % (self.name, topic))
         pubs = self.get_pubs()
-        tmsg = generate_msg_template(self.name, "command", "binary", "switch")
-        tmsg["command"]["default"]["value"] = msg["event"]["default"]["value"]
+        tmsg = IotMsg(self.name,MsgType.CMD,msg_class="binary",msg_subclass="switch")
         # message multiplexer
         for name,v in pubs.iteritems():
             if name in self.inverted_topics:
-                tmsg["command"]["default"]["value"] = not msg["event"]["default"]["value"]
+                tmsg.set_default(not iot_msg.get_default_value())
+            else :
+                tmsg.set_default(iot_msg.get_default_value())
             self.publish(name,tmsg)
 
 

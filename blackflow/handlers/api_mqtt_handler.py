@@ -8,7 +8,6 @@ __author__ = 'alivinco'
 
 log = logging.getLogger(__name__)
 
-
 class ApiMqttHandler:
     def __init__(self, app_manager, mqtt_adapter, context, instance_name, configs={}):
         self.discovery_sub_topic = "/discovery/commands"

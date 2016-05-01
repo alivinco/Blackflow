@@ -1,9 +1,7 @@
 import logging
 from blackflow.core.app import BfApp
-
-log = logging.getLogger(__name__)
-
 import pyfirmata
+log = logging.getLogger(__name__)
 
 
 class ServoCam(BfApp):
@@ -20,11 +18,10 @@ class ServoCam(BfApp):
         self.pins = {}
         self.pins[addr] = self.board.get_pin('d:%s:s'%addr)
 
-    def on_message(self,topic,msg):
+    def on_message(self,topic,iot_msg):
         log.info("%s app was triggered by %s"%(self.name,topic))
-        msg = msg["command"]
-        value = msg["default"]["value"]
-        servo_addr = int(msg["properties"]["address"])
+        value = iot_msg.get_default_value()
+        servo_addr = int(iot_msg.get_properties()["address"])
         self.pins[servo_addr].write(int(value))
 
 

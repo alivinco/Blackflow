@@ -1,4 +1,4 @@
-from blackflow.libs.msg_template import generate_msg_template
+from libs.iot_msg_lib.iot_msg import IotMsg, MsgType
 from blackflow.core.app import BfApp
 import time
 import logging
@@ -50,12 +50,12 @@ class SmartHomeMonitor(BfApp):
         """
         log.info("%s app was stopped ")
 
-    def on_message(self, topic, msg):
+    def on_message(self, topic, iot_msg):
         """
           The method is invoked every time variable from sub_for section is changed (sub_for section in app config)
          """
         log.info("%s app was triggered by %s" % (self.name, topic))
-        situation = msg["event"]["default"]["value"]
+        situation = iot_msg.get_default_value()
 
 
 
@@ -75,6 +75,6 @@ class SmartHomeMonitor(BfApp):
 
     def siren_control(self, state):
         # generate_msg_template function generates message template
-        msg = generate_msg_template(self.name, "command", "mode", "siren")
-        msg["command"]["default"]["value"] = state
-        return msg
+        iot_msg = IotMsg(self.name,MsgType.CMD,msg_class="mode",msg_subclass="siren")
+        iot_msg.set_default(state)
+        return iot_msg

@@ -107,6 +107,13 @@ class AppManager:
         """
         self.stop_app_instance(instance_id)
         aic = self.get_app_instances_configs(instance_id=instance_id)
+        # invoking on_uninstall callback , so app can run cleanup routines .
+        ai_obj = self.get_app_instance_obj(instance_id)
+        try:
+            if hasattr(ai_obj,"on_uninstall"):
+                ai_obj.on_uninstall()
+        except Exception as ex:
+            log.exception(ex)
         if aic:
             self.app_instances_configs.remove(aic[0])
             self.serialize_instances_config()
@@ -256,7 +263,12 @@ class AppManager:
                 for adapter in self.adapters:
                     adapter.unsubscribe(topic["topic"])
             self.scheduler.remove_schedules_for_instance(instance_id)
-
+            log.info("Invoking on_stop callback")
+            try:
+                if hasattr(ai,"on_stop"):
+                    ai.on_stop()
+            except Exception as ex:
+                log.exception(ex)
             log.info("Deleting app instance oobject")
             self.app_instances.remove(ai)
             self.get_app_instances_configs(instance_id=instance_id)[0]["state"] = AppInstanceState.STOPPED
