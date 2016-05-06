@@ -4,6 +4,7 @@
 #     JSON_IOT_MSG_V1 = 1
 #     # Binary encoded IOT message format
 #     BINARY_IOT_MSG_V1 = 3
+import datetime
 
 from iot_msg import MsgType, IotMsg
 
@@ -73,9 +74,9 @@ class IotMsgToJsonIotMsgV1Codec(IotMsgCodec):
                 "default": iot_msg.default,
                 "properties": iot_msg.properties,
                 "uuid": iot_msg.uuid,
-                "creationTime": iot_msg.timestamp,
-                "version": 0.1,
-                "id": "SP1"
+                "ctime": datetime.datetime.now().isoformat(),
+                "version": 1.0
+                # "id": "SP1"
                 }
 
     @classmethod
