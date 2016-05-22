@@ -14,6 +14,10 @@ class AppStore:
         self.apps_dir_path = apps_dir_path
 
     @staticmethod
+    def get_auth_header(id_token):
+        return {"Authorization":"Bearer %s"%id_token}
+
+    @staticmethod
     def zip_dir(dir_path=None, zip_file_path=None, include_dir_in_zip=True):
         """Create a zip archive from a directory.
 
@@ -75,10 +79,10 @@ class AppStore:
         with zipfile.ZipFile(zip_file, "r") as zp:
             zp.extractall(dest_dir)
 
-    @staticmethod
-    def download_file(url,local_file_path):
+    @classmethod
+    def download_file(cls,url,local_file_path,id_token):
         # NOTE the stream=True parameter
-        r = requests.get(url, stream=True)
+        r = requests.get(url, stream=True,headers=cls.get_auth_header(id_token))
         with open(local_file_path, 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk: # filter out keep-alive new chunks
@@ -86,7 +90,7 @@ class AppStore:
                     #f.flush() commented by recommendation from J.F.Sebastian
         return "saved"
 
-    def pack_and_upload_app(self, app_full_name):
+    def pack_and_upload_app(self, app_full_name,id_token):
         developer,app_name,version = split_app_full_name(app_full_name)
         app_full_name = compose_app_full_name(developer, app_name, version)
         tmp_file_path = os.path.join(self.apps_dir_path, app_full_name+".zip")
@@ -94,41 +98,41 @@ class AppStore:
         if not os.path.exists(app_dir):
             return None, "App %s can't be found "%app_full_name
 
-        app_meta = self.get_app_by_full_name(developer, app_name, float(version))
+        app_meta = self.get_app_by_full_name(developer, app_name, float(version),id_token)
         if app_meta:
             app_id = app_meta["id"]
         else:
             log.info("App doesn't exist in app store . Adding to app store")
-            app_id = self.register_app(developer, app_name, float(version))
+            app_id = self.register_app(developer, app_name, float(version),id_token)
 
         if app_id:
             AppStore.zip_dir(app_dir, tmp_file_path)
             log.debug("App was saved to %s" % tmp_file_path)
-            r_status = self.upload_file_to_app_store(app_id, tmp_file_path)
+            r_status = self.upload_file_to_app_store(app_id, tmp_file_path ,id_token)
             if r_status == 200:
                 log.info("App was uploaded successfully to AppStore")
                 return app_id, None
             else:
                 log.error("App upload process failed")
-                return None , "App store api returned status = %"%r_status
+                return None , "App store api returned status = %s"%r_status
         else:
             log.error("App registration failed because of error")
             return None , "Can't get app_id"
 
-    def download_and_unpack_app(self, app_id):
-        app_meta = self.get_app_by_id(app_id)
+    def download_and_unpack_app(self, app_id,id_token):
+        app_meta = self.get_app_by_id(app_id,id_token)
         tmp_file_path = os.path.join(self.apps_dir_path, app_meta["file"])
         log.info("Downloading app file %s from app store "%app_meta["file"])
-        self.download_file(self.app_store_uri+"/apps/file/"+app_id, tmp_file_path)
+        self.download_file(self.app_store_uri+"/apps/file/"+app_id, tmp_file_path,id_token)
         AppStore.unzip_dir(tmp_file_path,os.path.join(self.apps_dir_path,"lib"))
         os.remove(tmp_file_path)
         log.info("App %s was successfully downloaded and installed "%app_meta["file"])
         return compose_app_full_name(app_meta["developer"], app_meta["app_name"], app_meta["version"])
 
-    def upload_file_to_app_store(self, app_id, file_path):
+    def upload_file_to_app_store(self, app_id, file_path ,id_token):
         data = {"id": app_id}
         file = {'file': open(file_path, 'rb')}
-        r = requests.post(self.app_store_uri + "/apps/file", data=data, files=file)
+        r = requests.post(self.app_store_uri + "/apps/file", data=data, files=file , headers = self.get_auth_header(id_token))
         if r.status_code == 200:
             log.info("App %s was sent to app store successfully" % file_path)
             os.remove(file_path)
@@ -137,21 +141,22 @@ class AppStore:
             log.info("App %s failed to upload to app store . Error %s" % (file_path, r))
             return r.status_code
 
-    def get_app_by_full_name(self, developer, app_name, version):
-        r = requests.get(self.app_store_uri + "/apps/by_full_name", params={"developer": developer, "app_name": app_name, "version": version})
+    def get_app_by_full_name(self, developer, app_name, version , id_token):
+        r = requests.get(self.app_store_uri + "/apps/by_full_name", params={"developer": developer, "app_name": app_name, "version": version},
+                         headers=self.get_auth_header(id_token))
         if r.status_code == 200:
             return r.json()
         else:
             return None
 
-    def get_app_by_id(self, app_id):
-        r = requests.get(self.app_store_uri + "/apps/id/"+app_id)
+    def get_app_by_id(self, app_id , id_token):
+        r = requests.get(self.app_store_uri + "/apps/id/"+app_id,headers=self.get_auth_header(id_token))
         return r.json()
 
-    def register_app(self, developer, app_name, version):
+    def register_app(self, developer, app_name, version , id_token):
         new_app = {"app_name": app_name, "developer": developer, "version": float(version)}
         log.debug("Registering new app %s"%new_app)
-        r = requests.post(self.app_store_uri + "/apps", json=new_app)
+        r = requests.post(self.app_store_uri + "/apps", json=new_app, headers=self.get_auth_header(id_token))
         if r.status_code == 200:
             return r.json()["app_id"]
         else:

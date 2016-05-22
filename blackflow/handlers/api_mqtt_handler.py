@@ -2,7 +2,7 @@ import os
 import base64
 import logging
 from blackflow.libs.app_store import AppStore
-from libs.iot_msg_lib.iot_msg import MsgType, IotMsg
+from blackflow.libs.iot_msg_lib.iot_msg import MsgType, IotMsg
 
 __author__ = 'alivinco'
 
@@ -170,9 +170,9 @@ class ApiMqttHandler:
                 # default value = app_full_name
                 props = iot_msg.get_properties()
                 app_store_server = props["app_store_url"]
-                app_store_token = props["sec_token"]
+                id_token = props["id_token"]
                 app_store = AppStore(app_store_server, self.configs["apps_dir_path"])
-                app_id, err = app_store.pack_and_upload_app(iot_msg.get_default_value())
+                app_id, err = app_store.pack_and_upload_app(iot_msg.get_default_value(),id_token)
                 if not err:
                     self.reply_with_status(200, "app_id=" + app_id, iot_msg)
                 else:
@@ -182,9 +182,9 @@ class ApiMqttHandler:
             elif msg_subtype == "download_app":
                 props = iot_msg.get_properties()
                 app_store_server = props["app_store_url"]
-                app_store_token = props["sec_token"]
+                id_token = props["id_token"]
                 app_store = AppStore(app_store_server, self.configs["apps_dir_path"])
-                app_full_name = app_store.download_and_unpack_app(iot_msg.get_default_value())
+                app_full_name = app_store.download_and_unpack_app(iot_msg.get_default_value(),id_token)
                 self.app_man.load_app_manifest(app_full_name)
                 self.reply_with_status(200, "app_full_name=" + app_full_name, iot_msg)
 

@@ -1,7 +1,6 @@
-from libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
+from blackflow.libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
 
 __author__ = 'alivinco'
-import json
 import logging
 from adapter import Adapter
 

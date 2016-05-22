@@ -1,5 +1,5 @@
 from blackflow.core.app import BfApp
-from libs.iot_msg_lib.iot_msg import IotMsg, MsgType
+from blackflow.libs.iot_msg_lib.iot_msg import IotMsg, MsgType
 import logging
 log = logging.getLogger("BfApplicationTemplate")
 
