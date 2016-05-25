@@ -4,9 +4,9 @@ python:
 branches:
   only:
   - master
-
-script: scripts/debian/build_deb.sh
-
+script:
+  - scripts/debian/build_deb.sh
+  
 after_success:
   - docker build -t alivinco/blackflow .
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
@@ -16,6 +16,7 @@ after_success:
 before_deploy:
   - export RELEASE_PKG_FILE=$(ls dist/*.deb)
   - echo "deploying $RELEASE_PKG_FILE to GitHub releases"
+
 deploy:
   - provider: releases
     api_key:
