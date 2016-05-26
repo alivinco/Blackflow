@@ -3,6 +3,7 @@ import base64
 import logging
 from blackflow.libs.app_store import AppStore
 from blackflow.libs.iot_msg_lib.iot_msg import MsgType, IotMsg
+from libs.utils import get_local_ip
 
 __author__ = 'alivinco'
 
@@ -19,6 +20,7 @@ class ApiMqttHandler:
         self.context = context
         self.configs = configs
         self.instance_name = instance_name
+        self.local_ip = get_local_ip()
         # self.app_store = AppStore(self.configs["app_store"]["api_url"], self.configs["apps_dir_path"])
 
     def start(self):
@@ -55,7 +57,7 @@ class ApiMqttHandler:
                                          "name": "blackflow",
                                          "uri": app_full_name,
                                          "sdk": "py_blackflow_v1",
-                                         "ip": "127.0.0.1",
+                                         "ip": self.local_ip,
                                          "props": {"container_id": self.instance_name}
                                          })
 

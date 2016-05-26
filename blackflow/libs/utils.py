@@ -1,3 +1,4 @@
+import socket
 __author__ = 'alivinco'
 
 
@@ -19,3 +20,14 @@ def split_app_full_name(app_full_name):
 
 def compose_app_full_name(developer,app_name,version):
     return "%s_n%s_v%s"%(developer,app_name,version)
+
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("gmail.com",80))
+        ip = s.getsockname()[0]
+        s.close()
+    except:
+        ip = None
+    return ip
