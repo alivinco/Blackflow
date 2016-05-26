@@ -3,7 +3,7 @@ python:
 - 2.7
 branches:
   only:
-  - master
+  - travis
 
 sudo: required
 services:
@@ -18,16 +18,16 @@ after_success:
   - docker build -t alivinco/blackflow .
   - docker push alivinco/blackflow
 
-before_deploy:
-  - export RELEASE_PKG_FILE=$(ls dist/*.deb)
-  - echo "deploying $RELEASE_PKG_FILE to GitHub releases"
+#before_deploy:
+#  - export RELEASE_PKG_FILE=$(ls dist/*.deb)
+#  - echo "deploying $RELEASE_PKG_FILE to GitHub releases"
 
-deploy:
-  - provider: releases
-    api_key:
-    secure: iYjs1bKbi2cHKcWyhLFRoJjuuqcgPajvBoxdkLdWJdPsiq4nEq405vQqjS8ioc92T2RJ7O3zYjie9XqyMstvd91FLg/+ZiqkwchAnWP6W+HbweCI/JPPRZzaIBYkNQ/OVTiV1E3JI1FPfjrwgmb0qw/q9OiPkr6LZ+FRVXcKF6RjaV3hYFxuHzUBCRj1+A0NEDEzo93bxaAuP6sTocqA5PIw5L6AylJV3XBbYaQip38X33q9/ZrdrGVWV4+jHANDu2wi7ri07anQaCWdsPDAVIzBRJEFWBTDrKEIgXO07YZ4OZN/1Ejmoh7Cc0IM4TF02y9M8gyG+cre9pOTW8b/nbaWg9nzpu6jicHDF1U6YPtqVMt7+vzEhdEM1czUq8UJx/fWY/JKVfb/+IsdutY+QYfyje4w/ulmxJ717quyJn8fpfEKiWcHEAji7tIx6CyYlKoLfh5YDJM3jGF1ke6Rr2WtdyTvGX2t4y137ERPWh2r0WSUKHGKKHBneJcTGk+23Blji5EHVLl0XMB+kE/HeIjVNz/YzehfmrkysbTIrTtjHGr+SAyQaPSjLlGCTZgIgAGKhNRE1mAZnSgTcsUHlCmT4GMVfWVcxFhV2TrcwCYkSVpR32wiZP0OAFdy8FWZBHx3/JZK5C96fKqsqBU2eKFkf/EJtEmZ9T/Ilg6nUcA=
-    file: "${RELEASE_PKG_FILE}"
-    skip_cleanup: true
-    on:
-      repo: alivinco/Blackflow
-      branch: master
+#deploy:
+#  - provider: releases
+#    api_key:
+#    secure: iYjs1bKbi2cHKcWyhLFRoJjuuqcgPajvBoxdkLdWJdPsiq4nEq405vQqjS8ioc92T2RJ7O3zYjie9XqyMstvd91FLg/+ZiqkwchAnWP6W+HbweCI/JPPRZzaIBYkNQ/OVTiV1E3JI1FPfjrwgmb0qw/q9OiPkr6LZ+FRVXcKF6RjaV3hYFxuHzUBCRj1+A0NEDEzo93bxaAuP6sTocqA5PIw5L6AylJV3XBbYaQip38X33q9/ZrdrGVWV4+jHANDu2wi7ri07anQaCWdsPDAVIzBRJEFWBTDrKEIgXO07YZ4OZN/1Ejmoh7Cc0IM4TF02y9M8gyG+cre9pOTW8b/nbaWg9nzpu6jicHDF1U6YPtqVMt7+vzEhdEM1czUq8UJx/fWY/JKVfb/+IsdutY+QYfyje4w/ulmxJ717quyJn8fpfEKiWcHEAji7tIx6CyYlKoLfh5YDJM3jGF1ke6Rr2WtdyTvGX2t4y137ERPWh2r0WSUKHGKKHBneJcTGk+23Blji5EHVLl0XMB+kE/HeIjVNz/YzehfmrkysbTIrTtjHGr+SAyQaPSjLlGCTZgIgAGKhNRE1mAZnSgTcsUHlCmT4GMVfWVcxFhV2TrcwCYkSVpR32wiZP0OAFdy8FWZBHx3/JZK5C96fKqsqBU2eKFkf/EJtEmZ9T/Ilg6nUcA=
+#    file: "${RELEASE_PKG_FILE}"
+#    skip_cleanup: true
+#    on:
+#      repo: alivinco/Blackflow
+#      branch: master
