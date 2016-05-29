@@ -3,7 +3,7 @@ import base64
 import logging
 from blackflow.libs.app_store import AppStore
 from blackflow.libs.iot_msg_lib.iot_msg import MsgType, IotMsg
-from libs.utils import get_local_ip
+from blackflow.libs.utils import get_local_ip
 
 __author__ = 'alivinco'
 

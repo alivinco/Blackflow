@@ -2,6 +2,8 @@ import json
 import uuid
 import time
 
+import datetime
+
 __author__ = 'alivinco'
 
 
@@ -43,7 +45,7 @@ def get_uuid():
 
 
 def get_timestamp():
-    return int(time.time()) * 1000
+    return datetime.datetime.now().isoformat()
 
 
 class IotMsg:

@@ -22,7 +22,7 @@ class TestIotMsgConverter(TestCase):
         self.assertEqual(imsg.get_uuid(),"e48fbe58-3aaf-442d-b769-7a24aed8b716")
 
     def test_string_to_iot_msg_v1(self):
-        json_str = '{"msgType":"event","type": "binary","subType": "switch","default": {"value": true},"properties": {"p1": 165}, "creationTime": 1459696245000, "uuid": "e48fbe58-3aaf-442d-b769-7a24aed8b716", "id": "SP1"}'
+        json_str = '{"type":"event","cls": "binary","subcls": "switch","def": {"value": true},"props": {"p1": 165}, "ctime": "2016-05-29T15:28:26.013751", "uuid": "e48fbe58-3aaf-442d-b769-7a24aed8b716"}'
         imsg = IotMsgConverter.string_to_iot_msg("jim1/evt/ta/zw/1/bin_switch/1", json_str)
         self.assertEqual(imsg.get_msg_class(),"binary")
         self.assertEqual(imsg.get_msg_subclass(),"switch")
@@ -57,10 +57,10 @@ class TestIotMsgConverter(TestCase):
         mstr = IotMsgConverter.iot_msg_to_str(PayloadType.JSON_IOT_MSG_V1, m)
         self.assertIsInstance(mstr,basestring)
         jobj = json.loads(mstr)
-        self.assertEqual(jobj["default"]["value"],True)
-        self.assertEqual(jobj["msgType"],"command")
-        self.assertEqual(jobj["type"],"binary")
-        self.assertEqual(jobj["subType"],"switch")
+        self.assertEqual(jobj["def"]["value"],True)
+        self.assertEqual(jobj["type"],"cmd")
+        self.assertEqual(jobj["cls"],"binary")
+        self.assertEqual(jobj["subcls"],"switch")
 
     #
     def test_iot_msg_with_topic_to_str_v1(self):
@@ -70,7 +70,7 @@ class TestIotMsgConverter(TestCase):
         mstr = IotMsgConverter.iot_msg_with_topic_to_str("jim1/cmd/ta/zw/1/bin_switch/1", m)
         self.assertIsInstance(mstr,basestring)
         jobj = json.loads(mstr)
-        self.assertEqual(jobj["default"]["value"],True)
-        self.assertEqual(jobj["msgType"],"command")
-        self.assertEqual(jobj["type"],"binary")
-        self.assertEqual(jobj["subType"],"switch")
+        self.assertEqual(jobj["def"]["value"],True)
+        self.assertEqual(jobj["type"],"cmd")
+        self.assertEqual(jobj["cls"],"binary")
+        self.assertEqual(jobj["subcls"],"switch")

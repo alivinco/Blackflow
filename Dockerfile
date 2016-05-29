@@ -1,10 +1,11 @@
 FROM python:2.7.11-alpine
+MAINTAINER Aleksandrs.Livincovs@gmail.com
 RUN mkdir -p /var/lib/blackflow/apps/lib  \
     && mkdir -p /var/lib/blackflow/apps/data \
     && mkdir -p /var/log/blackflow/ \
     && touch /var/lib/blackflow/apps/__init__.py \
     && touch /var/lib/blackflow/apps/lib/__init__.py
-RUN apk --no-cache add ca-certificates && update-ca-certificates && ls -al /etc/ssl/certs
+RUN apk --no-cache add ca-certificates && update-ca-certificates
 ADD ./blackflow /usr/lib/blackflow/blackflow
 ADD ./blackflow/bin/blackflow_service.py /usr/lib/blackflow/
 WORKDIR /usr/lib/blackflow

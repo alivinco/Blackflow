@@ -61,31 +61,30 @@ class IotMsgToJsonIotMsgV0Codec(IotMsgCodec):
 
 class IotMsgToJsonIotMsgV1Codec(IotMsgCodec):
     msg_type_to_string_map = {
-        MsgType.CMD: "command",
+        MsgType.CMD: "cmd",
         MsgType.EVT: "event",
         MsgType.GET: "get"
     }
 
     @classmethod
     def encode(cls, iot_msg):
-        return {"msgType": cls.msg_type_to_string_map[iot_msg.msg_type],
-                "type": iot_msg.msg_class,
-                "subType": iot_msg.msg_subclass,
-                "default": iot_msg.default,
-                "properties": iot_msg.properties,
+        return {"type": cls.msg_type_to_string_map[iot_msg.msg_type],
+                "cls": iot_msg.msg_class,
+                "subcls": iot_msg.msg_subclass,
+                "def": iot_msg.default,
+                "props": iot_msg.properties,
                 "uuid": iot_msg.uuid,
                 "ctime": datetime.datetime.now().isoformat(),
-                "version": 1.0
-                # "id": "SP1"
+                "ver": 1.0
                 }
 
     @classmethod
     def decode(cls, dict_msg):
-        imsg = IotMsg(None, msg_type=cls.get_msg_type(dict_msg["msgType"]), msg_class=dict_msg["type"], msg_subclass=dict_msg["subType"])
-        imsg.default = dict_msg["default"]
-        imsg.set_properties(dict_msg["properties"])
+        imsg = IotMsg(None, msg_type=cls.get_msg_type(dict_msg["type"]), msg_class=dict_msg["cls"], msg_subclass=dict_msg["subcls"])
+        imsg.default = dict_msg["def"]
+        imsg.set_properties(dict_msg["props"])
         imsg.uuid = dict_msg["uuid"]
-        imsg.timestamp = dict_msg["creationTime"]
+        imsg.timestamp = dict_msg["ctime"]
         return imsg
 
 
