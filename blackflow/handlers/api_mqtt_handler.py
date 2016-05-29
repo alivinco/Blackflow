@@ -11,10 +11,10 @@ log = logging.getLogger(__name__)
 
 class ApiMqttHandler:
     def __init__(self, app_manager, mqtt_adapter, context, instance_name, configs={}):
-        self.discovery_sub_topic = "/discovery/commands"
-        self.discovery_pub_topic = "/discovery/events"
-        self.sub_topic = "/app/blackflow/%s/commands" % instance_name
-        self.pub_topic = "/app/blackflow/%s/events" % instance_name
+        self.discovery_sub_topic = "jim1/discovery/commands"
+        self.discovery_pub_topic = "jim1/discovery/events"
+        self.sub_topic = "jim1/app/blackflow/%s/commands" % instance_name
+        self.pub_topic = "jim1/app/blackflow/%s/events" % instance_name
         self.app_man = app_manager
         self.mqtt_adapter = mqtt_adapter
         self.context = context

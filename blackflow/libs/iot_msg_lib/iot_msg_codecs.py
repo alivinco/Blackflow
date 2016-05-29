@@ -68,7 +68,7 @@ class IotMsgToJsonIotMsgV1Codec(IotMsgCodec):
 
     @classmethod
     def encode(cls, iot_msg):
-        return {"type": cls.msg_type_to_string_map[iot_msg.msg_type],
+        r = {"type": cls.msg_type_to_string_map[iot_msg.msg_type],
                 "cls": iot_msg.msg_class,
                 "subcls": iot_msg.msg_subclass,
                 "def": iot_msg.default,
@@ -77,6 +77,9 @@ class IotMsgToJsonIotMsgV1Codec(IotMsgCodec):
                 "ctime": datetime.datetime.now().isoformat(),
                 "ver": 1.0
                 }
+        if iot_msg.corid:
+            r["corid"] = iot_msg.corid
+        return r
 
     @classmethod
     def decode(cls, dict_msg):
@@ -85,6 +88,8 @@ class IotMsgToJsonIotMsgV1Codec(IotMsgCodec):
         imsg.set_properties(dict_msg["props"])
         imsg.uuid = dict_msg["uuid"]
         imsg.timestamp = dict_msg["ctime"]
+        if "corid" in dict_msg:
+            imsg.corid = dict_msg["corid"]
         return imsg
 
 
