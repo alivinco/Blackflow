@@ -410,8 +410,8 @@ class AppManager:
                 if not(app_full_name in self.app_classes):
                     self.load_app_class(app_full_name)
 
-                app_inst = self.app_classes[app_full_name](app_config["id"], app_config["alias"], app_config["sub_for"], app_config["pub_to"],app_config["configs"])
                 try:
+                    app_inst = self.app_classes[app_full_name](app_config["id"], app_config["alias"], app_config["sub_for"], app_config["pub_to"],app_config["configs"])
                     app_inst.on_start()
                     # Add job to scheduler here
                     app_config["state"] = AppInstanceState.INITIALIZED

@@ -56,14 +56,18 @@ class MqttAdapter(Adapter):
         :param msg:
         :return IotMsg
         """
-        iot_msg = IotMsgConverter.string_to_iot_msg(msg.topic, msg.payload)
-        if msg.topic in self.api_sub:
-            try:
-                self.api_handler.route(msg.topic, iot_msg)
-            except Exception as ex:
-                log.exception(ex)
-        else:
-            self.context.set(self.adapter_prefix + msg.topic, iot_msg, src_name=self, src_type="adapter")
+        try:
+            iot_msg = IotMsgConverter.string_to_iot_msg(msg.topic, msg.payload)
+            if msg.topic in self.api_sub:
+                try:
+                    self.api_handler.route(msg.topic, iot_msg)
+                except Exception as ex:
+                    log.exception(ex)
+            else:
+                self.context.set(self.adapter_prefix + msg.topic, iot_msg, src_name=self, src_type="adapter")
+
+        except Exception as ex:
+            log.exception(ex)
 
     def publish(self, topic, iot_msg):
         if self.adapter_prefix in topic:
