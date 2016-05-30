@@ -6,7 +6,7 @@ log = logging.getLogger("bf_app_scheduler")
 
 class AppScheduler:
     def __init__(self):
-        self.scheduler = BackgroundScheduler()
+        self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'UTC'})
 
     def init_scheduler(self):
         self.scheduler.start()

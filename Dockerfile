@@ -10,8 +10,8 @@ ADD ./blackflow /usr/lib/blackflow/blackflow
 ADD ./blackflow/bin/blackflow_service.py /usr/lib/blackflow/
 WORKDIR /usr/lib/blackflow
 RUN ls -al /usr/lib/blackflow
-RUN rm -R /usr/lib/blackflow/blackflow/libs/site-packages/requests && rm -R /usr/lib/blackflow/blackflow/libs/site-packages/apscheduler
-#RUN pip install six requests apscheduler certifi
-RUN pip install six requests apscheduler
+#RUN rm -R /usr/lib/blackflow/blackflow/libs/site-packages/requests && rm -R /usr/lib/blackflow/blackflow/libs/site-packages/apscheduler
+#RUN pip install six requests apscheduler
 ENV INSTANCE_NAME="default" MQTT_HOST="localhost" MQTT_PORT="1883"
+VOLUME ["/var/lib/blackflow/apps/"]
 ENTRYPOINT python blackflow_service.py --name $INSTANCE_NAME --apps /var/lib/blackflow/apps --log_dir /var/log/blackflow --mqtt_host $MQTT_HOST --mqtt_port $MQTT_PORT
