@@ -25,7 +25,9 @@ class IotMsgConverter:
         :param payload_type:
         :return:
         """
-        payload_type = payload_type if payload_type else PayloadType.str_to_type_map[cls.parse_topic(topic)[0]]
+        if payload_type is None :
+            payload_type = PayloadType.str_to_type_map[cls.parse_topic(topic)[0]]
+
         if payload_type == PayloadType.JSON_IOT_MSG_V0:
             return IotMsgToJsonIotMsgV0Codec.decode(dict_msg)
         elif payload_type == PayloadType.JSON_IOT_MSG_V1:

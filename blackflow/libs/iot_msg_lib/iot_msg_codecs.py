@@ -4,7 +4,7 @@
 #     JSON_IOT_MSG_V1 = 1
 #     # Binary encoded IOT message format
 #     BINARY_IOT_MSG_V1 = 3
-import datetime
+import datetime ,time
 
 from iot_msg import MsgType, IotMsg
 
@@ -29,7 +29,7 @@ class IotMsgToJsonIotMsgV0Codec(IotMsgCodec):
     def encode(cls, iot_msg):
         r = {"origin": {"@id": iot_msg.origin, "@type": "app"},
              "uuid": iot_msg.uuid,
-             "creation_time": iot_msg.timestamp,
+             "creation_time": int(time.time()),
              cls.msg_type_to_string_map[iot_msg.msg_type]: {"default": iot_msg.default, "subtype": iot_msg.msg_subclass, "@type": iot_msg.msg_class,
                                                             "properties": iot_msg.properties},
              "id": ""
@@ -62,7 +62,7 @@ class IotMsgToJsonIotMsgV0Codec(IotMsgCodec):
 class IotMsgToJsonIotMsgV1Codec(IotMsgCodec):
     msg_type_to_string_map = {
         MsgType.CMD: "cmd",
-        MsgType.EVT: "event",
+        MsgType.EVT: "evt",
         MsgType.GET: "get"
     }
 
