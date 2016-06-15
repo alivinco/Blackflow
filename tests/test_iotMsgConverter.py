@@ -22,7 +22,7 @@ class TestIotMsgConverter(TestCase):
         self.assertEqual(imsg.get_uuid(),"e48fbe58-3aaf-442d-b769-7a24aed8b716")
 
     def test_string_to_iot_msg_v1(self):
-        json_str = '{"type":"event","cls": "binary","subcls": "switch","def": {"value": true},"props": {"p1": 165}, "ctime": "2016-05-29T15:28:26.013751", "uuid": "e48fbe58-3aaf-442d-b769-7a24aed8b716"}'
+        json_str = '{"type":"evt","cls": "binary","subcls": "switch","def": {"value": true},"props": {"p1": 165}, "ctime": "2016-05-29T15:28:26.013751", "uuid": "e48fbe58-3aaf-442d-b769-7a24aed8b716"}'
         imsg = IotMsgConverter.string_to_iot_msg("jim1/evt/ta/zw/1/bin_switch/1", json_str)
         self.assertEqual(imsg.get_msg_class(),"binary")
         self.assertEqual(imsg.get_msg_subclass(),"switch")
