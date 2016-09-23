@@ -190,6 +190,7 @@ class AppManager:
             inst_conf["pub_to"] = pub_to
             inst_conf["configs"] = configs
             inst_conf["comments"] = comments
+            # TODO: Check existing state first
             inst_conf["state"] = AppInstanceState.STOPPED
             inst_conf["auto_startup"] = auto_startup
             inst_conf["schedules"] = schedules

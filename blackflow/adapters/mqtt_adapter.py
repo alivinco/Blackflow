@@ -78,10 +78,18 @@ class MqttAdapter(Adapter):
 
     def initialize(self):
         self.mqtt.connect(self.hostname, self.port)
+        log.info("Adapter init is completed")
 
     def stop(self):
+        log.info("Stopping MQTT adapter.")
         self.mqtt.disconnect()
         super(MqttAdapter, self).stop()
 
     def run(self):
-        self.mqtt.loop_forever()
+        self.initialize()
+        try:
+            log.info("Starting loop")
+            self.mqtt.loop_forever()
+            log.info("Mqtt loop is stopped.")
+        except Exception as ex:
+            log.error(ex)

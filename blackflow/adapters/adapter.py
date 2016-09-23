@@ -1,15 +1,16 @@
 import logging
-from smartlylib.service.Service import Service
+from threading import Thread
 
 __author__ = 'alivinco'
 
 log = logging.getLogger("bf_rules_runner")
 
-class Adapter(Service):
+
+class Adapter(Thread):
     adapter = "test:"
 
     def __init__(self,context,name):
-        super(Adapter, self).__init__(name)
+        super(Adapter, self).__init__(name = self.__class__.__name__)
         self.context = context
         self.context.add_adapter(self)
 

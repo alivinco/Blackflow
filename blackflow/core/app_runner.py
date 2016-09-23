@@ -1,20 +1,21 @@
 from Queue import Queue, Empty
 import logging
 from blackflow.libs.thread_pool import ThreadPool
-from smartlylib.service.Service import  Service
+from threading import Thread
 __author__ = 'alivinco'
 
 log = logging.getLogger("bf_apps_runner")
 
 
-class AppRunner(Service):
+class AppRunner(Thread):
     def __init__(self, context,adapters,app_manager):
         # threading.Thread.__init__ (self)
-        super(AppRunner, self).__init__(self.__class__.__name__)
+        super(AppRunner, self).__init__(name = self.__class__.__name__)
         self.configured_app_instances = app_manager.get_app_instances()
         self.context_change_queue = Queue()
         self.app_manager = app_manager
         self.is_running = True
+        self.is_stopped = False
         self.app_execution_thread_pool = ThreadPool(5)
         context.on_context_change = self.on_context_change
         self.context = context
@@ -30,8 +31,11 @@ class AppRunner(Service):
         """
         self.context_change_queue.put(var_name)
 
+    def stop(self):
+        self.is_stopped = True
+
     def run(self):
-        while not self.isStopped():
+        while not self.is_stopped:
             try:
                 change_var_name = self.context_change_queue.get(timeout=2)
             except Empty:
