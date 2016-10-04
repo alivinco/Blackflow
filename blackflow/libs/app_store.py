@@ -160,6 +160,7 @@ class AppStore:
         if r.status_code == 200:
             return r.json()["app_id"]
         else:
+            log.error("App store error : %s "%r.json())
             return None
 
 

@@ -100,6 +100,7 @@ if __name__ == "__main__":
 
     rule_runner_service.start()
     mqtt_adapter_service.start()
+    # time.sleep(0.1)
     api_mqtt_handler.start()
     app_manager.start_apps()
 

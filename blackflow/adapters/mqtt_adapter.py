@@ -2,6 +2,7 @@ from blackflow.libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
 
 __author__ = 'alivinco'
 import logging
+import threading
 from adapter import Adapter
 
 import paho.mqtt.client as mqtt
@@ -16,12 +17,18 @@ class MqttAdapter(Adapter):
         super(MqttAdapter, self).__init__(context, "MqttAdapter")
         self.mqtt = mqtt.Client(client_id=client_id, clean_session=True)
         self.mqtt.on_message = self.on_message
+        self.mqtt.on_connect = self.on_connect
         self.hostname = host
         self.port = port
         self.api_handler = None
-        self.api_sub = ["jim1/app/blackflow/%s/commands"%instance_name,"jim1/discovery/commands"]
-        self.api_pub = ["jim1/app/blackflow/%s/events"%instance_name,"jim1/discovery/events"]
+        self.api_sub = ["jim1/cmd/app/blackflow/%s"%instance_name,"jim1/cmd/discovery"]
+        self.api_pub = ["jim1/evt/app/blackflow/%s"%instance_name,"jim1/evt/discovery"]
         self.alias = "mqtt"
+        self.startup_event = threading.Event()
+        self.global_prefix = ""
+
+    def set_global_prefix(self,prefix):
+        self.global_prefix = prefix
 
     def set_connection_params(self, hostname, port=1883):
         self.hostname = hostname
@@ -33,20 +40,34 @@ class MqttAdapter(Adapter):
     def subscribe(self, topic):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
+            if self.global_prefix:
+                topic = self.global_prefix+"/"+topic
             log.info("Mqtt adapter subscribing for topic = %s" % topic)
             self.mqtt.subscribe(str(topic), qos=1)
         elif topic in self.api_sub:
+            if self.global_prefix:
+                topic = self.global_prefix+"/"+topic
             log.info("Mqtt adapter subscribing for topic = %s" % topic)
             self.mqtt.subscribe(str(topic), qos=1)
+        else :
+            log.info("Subscribe operation for topic = %s is skipped "%topic)
 
     def unsubscribe(self, topic):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
+            if self.global_prefix:
+                topic = self.global_prefix+"/"+topic
             log.info("Unsubscribing from topic = %s"%topic)
             self.mqtt.unsubscribe(str(topic))
         elif topic in self.api_sub:
+            if self.global_prefix:
+                topic = self.global_prefix+"/"+topic
             log.info("Mqtt adapter unsubscribing from topic = %s" % topic)
             self.mqtt.unsubscribe(str(topic))
+
+    def on_connect(self,client, userdata, flags, rc):
+        log.info("Mqtt adapter connected %s , %s , %s"%(client,userdata,flags))
+        self.startup_event.set()
 
     def on_message(self, client, userdata, msg):
         """
@@ -72,8 +93,12 @@ class MqttAdapter(Adapter):
     def publish(self, topic, iot_msg):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
+            if self.global_prefix:
+                topic = self.global_prefix+"/"+topic
             self.mqtt.publish(topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
         elif topic in self.api_pub:
+            if self.global_prefix:
+                topic = self.global_prefix+"/"+topic
             self.mqtt.publish(topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
 
     def initialize(self):
@@ -83,10 +108,17 @@ class MqttAdapter(Adapter):
     def stop(self):
         log.info("Stopping MQTT adapter.")
         self.mqtt.disconnect()
+        self.startup_event.clear()
         super(MqttAdapter, self).stop()
 
-    def run(self):
+    def start(self):
+        log.info("Starting MQTT adapter.")
         self.initialize()
+        super(MqttAdapter, self).start()
+        # waiting while connection is established
+        self.startup_event.wait(10)
+
+    def run(self):
         try:
             log.info("Starting loop")
             self.mqtt.loop_forever()
