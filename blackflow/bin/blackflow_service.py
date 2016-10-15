@@ -58,11 +58,15 @@ if __name__ == "__main__":
             LOG_DIR = configs["log_dir"]
             MQTT_HOST = configs["mqtt"]["host"]
             MQTT_PORT = configs["mqtt"]["port"]
+            MQTT_USERNAME = configs["mqtt"]["username"]
+            MQTT_PASSWORD = configs["mqtt"]["password"]
     else :
         configs = {"instance_config":{"name":"default"}}
 
     if args.mqtt_host: MQTT_HOST = args.mqtt_host
     if args.mqtt_port: MQTT_PORT = int(args.mqtt_port)
+    if args.mqtt_user: MQTT_USERNAME = args.mqtt_user
+    if args.mqtt_pass: MQTT_PASSWORD = args.mqtt_pass
     if args.log_dir: LOG_DIR = args.log_dir
     if args.name: CONTAINER_NAME = args.name
 
@@ -89,7 +93,10 @@ if __name__ == "__main__":
     storage_file = os.path.join(args.apps,"data",CONTAINER_NAME+".db")
     context = BfContext(storage_path=storage_file)
 
-    mqtt_adapter_service = MqttAdapter(context,CONTAINER_NAME,client_id="blackflow_"+CONTAINER_NAME,host=MQTT_HOST,port=MQTT_PORT)
+    mqtt_adapter_service = MqttAdapter(context,CONTAINER_NAME,client_id="blackflow_"+CONTAINER_NAME,host=MQTT_HOST,port=MQTT_PORT,username=MQTT_USERNAME,password=MQTT_PASSWORD)
+    if configs["mqtt"]["topic_prefix"]:
+        mqtt_adapter_service.set_global_prefix(configs["mqtt"]["topic_prefix"])
+
     adapters.append(mqtt_adapter_service)
     sys.path.append(args.apps.replace("apps",""))
     app_manager = AppManager(context,adapters,args.apps,configs=configs)
@@ -100,7 +107,6 @@ if __name__ == "__main__":
 
     rule_runner_service.start()
     mqtt_adapter_service.start()
-    # time.sleep(0.1)
     api_mqtt_handler.start()
     app_manager.start_apps()
 

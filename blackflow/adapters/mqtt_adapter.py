@@ -13,11 +13,13 @@ log = logging.getLogger("mqtt_adapter")
 class MqttAdapter(Adapter):
     adapter_prefix = "mqtt:"
 
-    def __init__(self, context,instance_name, client_id="blackflow",host="localhost",port=1883):
+    def __init__(self, context,instance_name, client_id="blackflow",host="localhost",port=1883,username="",password=""):
         super(MqttAdapter, self).__init__(context, "MqttAdapter")
         self.mqtt = mqtt.Client(client_id=client_id, clean_session=True)
         self.mqtt.on_message = self.on_message
         self.mqtt.on_connect = self.on_connect
+        if username:
+            self.mqtt.username_pw_set(username,password)
         self.hostname = host
         self.port = port
         self.api_handler = None
@@ -78,6 +80,9 @@ class MqttAdapter(Adapter):
         :return IotMsg
         """
         try:
+            if self.global_prefix:
+                msg.topic = msg.topic.replace(self.global_prefix+"/","")
+            log.debug("Final on message topic %s"%msg.topic)
             iot_msg = IotMsgConverter.string_to_iot_msg(msg.topic, msg.payload)
             if msg.topic in self.api_sub:
                 try:
@@ -93,13 +98,11 @@ class MqttAdapter(Adapter):
     def publish(self, topic, iot_msg):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
-            if self.global_prefix:
-                topic = self.global_prefix+"/"+topic
-            self.mqtt.publish(topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
+            final_topic = self.global_prefix+"/"+topic if self.global_prefix else topic
+            self.mqtt.publish(final_topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
         elif topic in self.api_pub:
-            if self.global_prefix:
-                topic = self.global_prefix+"/"+topic
-            self.mqtt.publish(topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
+            final_topic = self.global_prefix+"/"+topic if self.global_prefix else topic
+            self.mqtt.publish(final_topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
 
     def initialize(self):
         self.mqtt.connect(self.hostname, self.port)
