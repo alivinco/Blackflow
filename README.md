@@ -1,4 +1,37 @@
-## Blackflow app engine
+## Blackflow app container
+
+### Blackflow container configuration 
+
+#### Using config file
+  Blackflow instance is configurable via blackflow_config.json . Config file location has to be set using -c command line parameter 
+  for instance : 
+  
+  `python bin/blackflow_service.py -c examples/config/blackflow_config.json -a ./../BlackflowApps/apps`
+
+#### Using ENV variables 
+  
+  
+#### Configurable parameters 
+  ```
+  {
+  "instance_config": {
+    "name": "default"
+  },
+  "mqtt": {
+    "topic_prefix":"W6Ir",
+    "host": "localhost",
+    "port": 1883,
+    "username":"1234",
+    "password":"123455"
+  },
+  "log_dir": "./"
+}
+  ```
+  
+  instance.config - is used as container instance identifier , thus becomes mqtt client id and part of container control topic , for instance  W6Ir/jim1/cmd/app/blackflow/default
+  
+  mqtt.topic_prefix - is global topic prefix.All message will be prefixed using the topic . For instance it is used for domain identification 
+  
 
 ### Application packaging
 
@@ -33,7 +66,7 @@ Application folder structure :
 + configs - List of configurations needs to be set before an app can operate .
 + descr - Short description of the application.
 
-#### App lifecycle :
+### App lifecycle :
 
 + App states :     
      STOPPED - application instance is stopped . Application classes and artifacts are not loaded .    
