@@ -3,11 +3,12 @@
     "name": "default"
   },
   "mqtt": {
-    "topic_prefix":"",
+    "use_clean_session":true,
+    "topic_prefix":"W6Ir",
     "host": "localhost",
     "port": 1883,
-    "username":"",
-    "password":""
+    "username":"s5WUF0",
+    "password":"fPUFt5lLEems"
   },
   "log_dir": "./"
 }

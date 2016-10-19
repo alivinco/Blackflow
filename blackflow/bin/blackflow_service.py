@@ -36,6 +36,7 @@ if __name__ == "__main__":
 
     CONTAINER_NAME = "default"
     LOG_DIR = "./"
+    MQTT_CLEAN_SESSION = True
     MQTT_HOST = "localhost"
     MQTT_PORT = 1883
     MQTT_USERNAME = None
@@ -86,11 +87,13 @@ if __name__ == "__main__":
         MQTT_CLIENTID = env.get("ZM_MQTT_CLIENTID")
     else:
         MQTT_CLIENTID = "blackflow_" + CONTAINER_NAME
+    if env.get("ZM_MQTT_CLEAN_SESSION"):
+        MQTT_CLEAN_SESSION = env.get("ZM_MQTT_CLEAN_SESSION")
 
     if env.get("ZM_APP_INSTANCE"):
         CONTAINER_NAME = env.get("ZM_APP_INSTANCE")
     if env.get("ZM_DOMAIN"):
-        GLOBAL_PREFIX = env.get("GLOBAL_PREFIX")
+        GLOBAL_PREFIX = env.get("ZM_DOMAIN")
     elif configs["mqtt"]["topic_prefix"]:
         GLOBAL_PREFIX = configs["mqtt"]["topic_prefix"]
 
@@ -99,6 +102,7 @@ if __name__ == "__main__":
     print "Starting service with parameters :"
     print "CONTAINER_NAME=%s" % CONTAINER_NAME
     print "GLOBAL_PREFIX=%s" % GLOBAL_PREFIX
+    print "MQTT_CLEAN_SESSION=%s" % MQTT_CLEAN_SESSION
     print "MQTT_CLIENTID=%s" % MQTT_CLIENTID
     print "MQTT_HOST=%s" % MQTT_HOST
     print "MQTT_PORT=%s" % MQTT_PORT
@@ -119,7 +123,7 @@ if __name__ == "__main__":
     storage_file = os.path.join(args.apps, "data", CONTAINER_NAME + ".db")
     context = BfContext(storage_path=storage_file)
 
-    mqtt_adapter_service = MqttAdapter(context, CONTAINER_NAME, client_id=MQTT_CLIENTID, host=MQTT_HOST, port=MQTT_PORT, username=MQTT_USERNAME, password=MQTT_PASSWORD)
+    mqtt_adapter_service = MqttAdapter(context, CONTAINER_NAME, client_id=MQTT_CLIENTID, host=MQTT_HOST, port=MQTT_PORT, username=MQTT_USERNAME, password=MQTT_PASSWORD , use_clean_session=MQTT_CLEAN_SESSION)
     if GLOBAL_PREFIX:
         mqtt_adapter_service.set_global_prefix(GLOBAL_PREFIX)
 

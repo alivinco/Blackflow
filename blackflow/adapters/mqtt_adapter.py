@@ -13,11 +13,12 @@ log = logging.getLogger("mqtt_adapter")
 class MqttAdapter(Adapter):
     adapter_prefix = "mqtt:"
 
-    def __init__(self, context,instance_name, client_id="blackflow",host="localhost",port=1883,username="",password=""):
+    def __init__(self, context,instance_name, client_id="blackflow",host="localhost",port=1883,username="",password="",use_clean_session=True):
         super(MqttAdapter, self).__init__(context, "MqttAdapter")
-        self.mqtt = mqtt.Client(client_id=client_id, clean_session=True)
+        self.mqtt = mqtt.Client(client_id=client_id, clean_session=use_clean_session)
         self.mqtt.on_message = self.on_message
         self.mqtt.on_connect = self.on_connect
+        self.mqtt.on_disconnect = self.on_disconnect
         if username:
             self.mqtt.username_pw_set(username,password)
         self.hostname = host
@@ -28,6 +29,8 @@ class MqttAdapter(Adapter):
         self.alias = "mqtt"
         self.startup_event = threading.Event()
         self.global_prefix = ""
+        self.use_clean_session = use_clean_session
+        self.topics = list()
 
     def set_global_prefix(self,prefix):
         self.global_prefix = prefix
@@ -40,6 +43,7 @@ class MqttAdapter(Adapter):
         self.api_handler = api_handler
 
     def subscribe(self, topic):
+        self.topics.append(topic)
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
             if self.global_prefix:
@@ -55,6 +59,7 @@ class MqttAdapter(Adapter):
             log.info("Subscribe operation for topic = %s is skipped "%topic)
 
     def unsubscribe(self, topic):
+        self.topics.remove(topic)
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
             if self.global_prefix:
@@ -70,6 +75,11 @@ class MqttAdapter(Adapter):
     def on_connect(self,client, userdata, flags, rc):
         log.info("Mqtt adapter connected %s , %s , %s"%(client,userdata,flags))
         self.startup_event.set()
+        for topic in list(self.topics):
+            self.subscribe(topic)
+
+    def on_disconnect(self,client, userdata, rc):
+        log.error("Connection to mqtt broker was lost.")
 
     def on_message(self, client, userdata, msg):
         """

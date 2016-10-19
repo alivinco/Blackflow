@@ -8,8 +8,6 @@
   
   `python bin/blackflow_service.py -c examples/config/blackflow_config.json -a ./../BlackflowApps/apps`
 
-#### Using ENV variables 
-  
   
 #### Configurable parameters 
   ```
@@ -32,6 +30,17 @@
   
   mqtt.topic_prefix - is global topic prefix.All message will be prefixed using the topic . For instance it is used for domain identification 
   
+#### Using ENV variables 
+The application can be configured via ENV variables :
+  + ZM_MQTT_BROKER_ADDR
+  + ZM_MQTT_USERNAME
+  + ZM_MQTT_PASSWORD
+  + ZM_MQTT_CLIENTID
+  + ZM_MQTT_CLEAN_SESSION
+  + ZM_APP_INSTANCE - blackflow instance name .
+  + ZM_DOMAIN - becomes topic prefix 
+  
+Configurations set via ENV variables will override configurations from config file .   
 
 ### Application packaging
 
@@ -144,4 +153,17 @@ Application folder structure :
             self.var_set("is_alarms_situation", True,persist=True)
 
 
+#### Docker 
+Build container : 
+````
+docker build -t alivinco/blackflow .
+or 
+make dist-docker
+````
 
+Publish : 
+````
+docker push alivinco/blackflow
+or 
+make docker-publish
+````
