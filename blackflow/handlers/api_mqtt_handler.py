@@ -136,13 +136,23 @@ class ApiMqttHandler:
                 self.reply_with_status(200, "", iot_msg)
 
             elif msg_subtype == "get_apps":
+                props = iot_msg.get_properties()
+                sfilter = None
+                if props:
+                    if "filter" in props:
+                        sfilter = props["filter"]
                 resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "apps", req_msg=iot_msg)
-                resp_msg.set_properties({"apps": self.app_man.get_app_manifests()})
+                resp_msg.set_properties({"apps": self.app_man.get_app_manifests(sfilter)})
                 self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
             elif msg_subtype == "get_app_instances":
+                props = iot_msg.get_properties()
+                sfilter = None
+                if props:
+                    if "filter" in props:
+                        sfilter = props["filter"]
                 resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "app_instances", req_msg=iot_msg)
-                resp_msg.set_properties({"app_instances": self.app_man.get_app_configs()})
+                resp_msg.set_properties({"app_instances": self.app_man.get_app_configs(sfilter)})
                 self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
             elif msg_subtype == "context_get":
@@ -152,7 +162,6 @@ class ApiMqttHandler:
                     if isinstance(v["value"],IotMsg) :
                         v["value"] = str(v["value"])
                     # result[k]=v
-
                 resp_msg.set_properties(result)
                 self.mqtt_adapter.publish(self.pub_topic, resp_msg)
 
@@ -217,9 +226,9 @@ class ApiMqttHandler:
                     self.app_man.load_app_manifests()
                 self.reply_with_status(200, "", iot_msg)
 
-
         elif msg_type == "config":
             if msg_subtype == "set":
                 pass
             if msg_subtype == "get":
                 pass
+

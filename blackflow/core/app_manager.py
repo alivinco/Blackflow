@@ -235,13 +235,22 @@ class AppManager:
             log.error("Instance can't be found because of error %s" % ex)
             return None
 
-    def get_app_manifests(self):
+    def get_app_manifests(self,sfilter = None):
         """
         Return list of all app manifests .
 
+        :param sfilter: search filter , so far supported fields : name , version , developer
         :return:
         """
-        return self.app_manifests
+        if sfilter:
+            try:
+                return filter(lambda app: app["developer"] == sfilter["developer"] and
+                                           app["name"] == sfilter["name"] and
+                                           app["version"] == sfilter["version"], self.app_manifests)
+            except:
+                return []
+        else :
+            return self.app_manifests
 
     def load_app_manifest(self,app_full_name):
         self.app_manifests.append(json.load(file(os.path.join(self.apps_dir_path, 'lib', app_full_name, "manifest.json"))))
@@ -249,12 +258,23 @@ class AppManager:
     def get_app_manifest(self, app_full_name):
         developer,app_name, version = split_app_full_name(app_full_name)
         try:
-            return filter(lambda app_manif:app_manif["developer"] == developer and app_manif["name"] == app_name and app_manif["version"] == version, self.app_manifests)[0]
+            return filter(lambda app_manif:app_manif["developer"] == developer and app_manif["name"] == app_name and app_manif["version"] == version, self.app_manifests)
         except:
             return None
 
-    def get_app_configs(self):
-        return self.app_instances_configs
+    def get_app_configs(self,sfilter = None):
+        """
+        Return list of application instances
+        :param sfilter: response can be filtered by id by setting sfilter["id"]
+        :return:
+        """
+        if sfilter:
+            try:
+                return filter(lambda app: app["id"] == sfilter["id"],self.app_instances_configs)
+            except:
+                return []
+        else:
+            return self.app_instances_configs
 
     def stop_app_instance(self, instance_id):
         ai = self.get_app_instance_obj(instance_id)
