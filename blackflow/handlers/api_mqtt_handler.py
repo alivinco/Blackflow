@@ -1,9 +1,11 @@
+import copy
 import os
 import base64
 import logging
 from blackflow.libs.app_store import AppStore
-from blackflow.libs.iot_msg_lib.iot_msg import MsgType, IotMsg
+from blackflow.libs.iot_msg_lib.iot_msg import MsgType, IotMsg, PayloadType
 from blackflow.libs.utils import get_local_ip
+from libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
 
 __author__ = 'alivinco'
 
@@ -21,6 +23,7 @@ class ApiMqttHandler:
         self.configs = configs
         self.instance_name = instance_name
         self.local_ip = get_local_ip()
+        self.alias = "ApiMqttHandler"
         # self.app_store = AppStore(self.configs["app_store"]["api_url"], self.configs["apps_dir_path"])
 
     def start(self):
@@ -157,13 +160,44 @@ class ApiMqttHandler:
 
             elif msg_subtype == "context_get":
                 resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "context", req_msg=iot_msg)
-                result = self.context.get_dict()
+                result = copy.deepcopy(self.context.get_dict())
                 for k , v in result.iteritems():
                     if isinstance(v["value"],IotMsg) :
                         v["value"] = str(v["value"])
                     # result[k]=v
                 resp_msg.set_properties(result)
                 self.mqtt_adapter.publish(self.pub_topic, resp_msg)
+
+            elif msg_subtype == "context_record_get":
+                topic = iot_msg.get_default_value()
+                def_val = self.context.get(topic)
+                resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "context_record", req_msg=iot_msg)
+                ser_val = ""
+                type_ = ""
+                if isinstance(def_val,IotMsg):
+                    ser_val = IotMsgConverter.iot_msg_to_dict(PayloadType.JSON_IOT_MSG_V1,def_val)
+                    type_ = "IotMsg"
+                elif type(def_val) is dict :
+                    ser_val = def_val
+                    type_ = "dict"
+                else :
+                    ser_val = str(def_val)
+                    type_ = "string"
+
+                resp_msg.set_default(ser_val, type_=type_)
+                self.mqtt_adapter.publish(self.pub_topic, resp_msg)
+
+            elif msg_subtype == "context_record_set":
+                payload = iot_msg.get_default()["value"]
+                type_ = iot_msg.get_default()["type"]
+                key = iot_msg.get_properties()["topic"]
+                val = None
+                if type_ == "IotMsg":
+                    val = IotMsgConverter.dict_to_iot_msg(None,payload, PayloadType.JSON_IOT_MSG_V1)
+                else:
+                    val = str(payload)
+                # log.debug("context_record_set ")
+                self.context.set(key, val, src_name=self, src_type="app")
 
             elif msg_subtype == "analytics_get":
                 resp_msg = IotMsg("blackflow", MsgType.EVT, "blackflow", "analytics" ,req_msg=iot_msg)
@@ -215,7 +249,7 @@ class ApiMqttHandler:
             if msg_subtype == "upload":
                 props = iot_msg.get_properties()
                 name = props["name"]
-                type = props["type"]
+                type_ = props["type"]
                 data = props["bin_data"]
                 post_save_action = props["post_save_action"] if "post_save_action" in props else None
                 full_path = os.path.join(self.app_man.apps_dir_path, "lib", name)
