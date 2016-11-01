@@ -5,7 +5,7 @@ import logging
 from blackflow.libs.app_store import AppStore
 from blackflow.libs.iot_msg_lib.iot_msg import MsgType, IotMsg, PayloadType
 from blackflow.libs.utils import get_local_ip
-from libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
+from blackflow.libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
 
 __author__ = 'alivinco'
 
