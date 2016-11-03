@@ -85,7 +85,10 @@ class IotMsgToJsonIotMsgV1Codec(IotMsgCodec):
     def decode(cls, dict_msg):
         imsg = IotMsg(None, msg_type=cls.get_msg_type(dict_msg["type"]), msg_class=dict_msg["cls"], msg_subclass=dict_msg["subcls"])
         imsg.default = dict_msg["def"]
-        imsg.set_properties(dict_msg["props"])
+        if "props" in dict_msg:
+            imsg.set_properties(dict_msg["props"])
+        else:
+            imsg.set_properties(None)
         imsg.uuid = dict_msg["uuid"]
         imsg.timestamp = dict_msg["ctime"]
         if "corid" in dict_msg:
