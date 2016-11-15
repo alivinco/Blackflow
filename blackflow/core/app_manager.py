@@ -3,14 +3,15 @@ from threading import Lock
 from blackflow.libs.utils import get_next_id
 from blackflow.core.app_scheduler import AppScheduler
 from blackflow.libs.utils import split_app_full_name, compose_app_full_name
+from libs import logger
 import importlib
 import json
 import os
-import logging
+# import logging
 import shutil
 
 __author__ = 'alivinco'
-log = logging.getLogger("bf_app_manager")
+log = logger.getLogger("mqtt_adapter")
 
 
 class AppInstanceState:

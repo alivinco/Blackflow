@@ -1,9 +1,9 @@
 import pickle
 import threading
-from Queue import Queue, Empty
-import json
-import logging
-import os
+# from Queue import Queue, Empty
+# import json
+import logger
+# import os
 from threading import Lock
 import time
 
@@ -12,7 +12,7 @@ import sqlite3
 from blackflow.libs.analytics import AppAnalytics
 
 __author__ = 'alivinco'
-log = logging.getLogger("context")
+log = logger.getLogger("context")
 
 
 class BfContext:

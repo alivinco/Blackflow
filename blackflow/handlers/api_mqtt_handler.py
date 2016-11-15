@@ -1,7 +1,7 @@
 import copy
 import os
 import base64
-import logging
+from libs import logger
 from blackflow.libs.app_store import AppStore
 from blackflow.libs.iot_msg_lib.iot_msg import MsgType, IotMsg, PayloadType
 from blackflow.libs.utils import get_local_ip
@@ -9,7 +9,7 @@ from blackflow.libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
 
 __author__ = 'alivinco'
 
-log = logging.getLogger(__name__)
+log = logger.getLogger(__name__)
 
 class ApiMqttHandler:
     def __init__(self, app_manager, mqtt_adapter, context, instance_name, configs={}):

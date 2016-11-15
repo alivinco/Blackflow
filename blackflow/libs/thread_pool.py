@@ -1,10 +1,8 @@
-__author__ = 'alivinco'
-
-
 from Queue import Queue
 from threading import Thread
-import logging
-log = logging.getLogger("thread_pool")
+from libs import logger
+__author__ = 'alivinco'
+log = logger.getLogger("thread_pool")
 
 class Worker(Thread):
     """Thread executing tasks from a given tasks queue"""

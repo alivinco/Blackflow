@@ -1,4 +1,4 @@
-import logging
+import logger
 
 __author__ = 'alivinco'
 
@@ -11,7 +11,7 @@ mqtt messages becomes key value pare
 
 """
 
-log = logging.getLogger("bf_app")
+# log = logging.getLogger("bf_app")
 
 
 class BfApp:
@@ -26,6 +26,7 @@ class BfApp:
         self.pub_to = publishes_to
         self.configs = configs
         self.alias = alias
+        self.log = logger.getLogger("")
 
     def get_id(self):
         return self.id

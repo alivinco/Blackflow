@@ -3,8 +3,6 @@ from threading import Thread
 
 __author__ = 'alivinco'
 
-log = logging.getLogger("bf_rules_runner")
-
 
 class Adapter(Thread):
     adapter = "test:"

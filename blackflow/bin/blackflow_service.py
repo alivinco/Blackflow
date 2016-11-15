@@ -11,9 +11,11 @@ from blackflow.adapters.mqtt_adapter import MqttAdapter
 from blackflow.core.app_manager import AppManager
 from blackflow.core.app_runner import AppRunner
 from blackflow.handlers.api_mqtt_handler import ApiMqttHandler
-import logging, logging.config
-import blackflow.configs.log
+# import logging, logging.config
+from libs import logger
+# import blackflow.configs.log
 from os import environ as env
+
 
 __author__ = 'alivinco'
 
@@ -29,6 +31,7 @@ def sigterm_handler(signum, frame):
     rule_runner_service.stop()
     mqtt_adapter_service.stop()
     api_mqtt_handler.stop()
+    logger.stopLogger()
     is_app_running = False
 
 
@@ -109,12 +112,13 @@ if __name__ == "__main__":
     print "APPS_DIR=%s" % args.apps
     print "LOG_DIR=%s" % LOG_DIR
 
-    blackflow.configs.log.config["handlers"]["info_file_handler"]["filename"] = os.path.join(LOG_DIR, "blackflow_info.log")
-    blackflow.configs.log.config["handlers"]["error_file_handler"]["filename"] = os.path.join(LOG_DIR, "blackflow_error.log")
-    logging.config.dictConfig(blackflow.configs.log.config)
+    # blackflow.configs.log.config["handlers"]["info_file_handler"]["filename"] = os.path.join(LOG_DIR, "blackflow_info.log")
+    # blackflow.configs.log.config["handlers"]["error_file_handler"]["filename"] = os.path.join(LOG_DIR, "blackflow_error.log")
+    # logging.config.dictConfig(blackflow.configs.log.config)
     configs["apps_dir_path"] = args.apps
 
-    log = logging.getLogger("bf_service")
+    log = logger.getLogger("bf_service")
+    logger.configure("blackflow.log")
 
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)

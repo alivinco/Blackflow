@@ -6,8 +6,8 @@ import threading
 from adapter import Adapter
 
 import paho.mqtt.client as mqtt
-
-log = logging.getLogger("mqtt_adapter")
+from libs import logger
+log = logger.getLogger("mqtt_adapter")
 
 
 class MqttAdapter(Adapter):

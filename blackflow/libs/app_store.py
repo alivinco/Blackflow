@@ -1,11 +1,11 @@
 import os
 import zipfile
 import requests
-import logging
+from libs import logger
 
 from blackflow.libs.utils import compose_app_full_name, split_app_full_name
 
-log = logging.getLogger("bf_app_store")
+log = logger.getLogger("bf_app_store")
 
 
 class AppStore:

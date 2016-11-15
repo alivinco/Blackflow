@@ -1,10 +1,10 @@
 from Queue import Queue, Empty
-import logging
+# import logging
 from blackflow.libs.thread_pool import ThreadPool
 from threading import Thread
 __author__ = 'alivinco'
-
-log = logging.getLogger("bf_apps_runner")
+from libs import logger
+log = logger.getLogger("bf_apps_runner")
 
 
 class AppRunner(Thread):
