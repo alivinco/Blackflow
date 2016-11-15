@@ -1,5 +1,5 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from libs import logger
+from blackflow.libs import logger
 import copy
 log = logger.getLogger("app_scheduler")
 

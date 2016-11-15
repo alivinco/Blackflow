@@ -1,12 +1,9 @@
 from blackflow.libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
-
-__author__ = 'alivinco'
-import logging
 import threading
 from adapter import Adapter
-
 import paho.mqtt.client as mqtt
-from libs import logger
+from blackflow.libs import logger
+__author__ = 'alivinco'
 log = logger.getLogger("mqtt_adapter")
 
 

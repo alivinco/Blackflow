@@ -1,7 +1,7 @@
 import copy
 import os
 import base64
-from libs import logger
+from blackflow.libs import logger
 from blackflow.libs.app_store import AppStore
 from blackflow.libs.iot_msg_lib.iot_msg import MsgType, IotMsg, PayloadType
 from blackflow.libs.utils import get_local_ip

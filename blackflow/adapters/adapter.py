@@ -1,4 +1,3 @@
-import logging
 from threading import Thread
 
 __author__ = 'alivinco'

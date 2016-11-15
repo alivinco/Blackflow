@@ -1,6 +1,6 @@
 from Queue import Queue
 from threading import Thread
-from libs import logger
+import logger
 __author__ = 'alivinco'
 log = logger.getLogger("thread_pool")
 

@@ -13,7 +13,7 @@ from blackflow.core.app_manager import AppManager
 from blackflow.core.app_runner import AppRunner
 from blackflow.handlers.api_mqtt_handler import ApiMqttHandler
 # import logging, logging.config
-from libs import logger
+from blackflow.libs import logger
 # import blackflow.configs.log
 from os import environ as env
 

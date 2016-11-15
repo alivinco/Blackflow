@@ -1,4 +1,4 @@
-from libs import logger
+from blackflow.libs import logger
 
 __author__ = 'alivinco'
 

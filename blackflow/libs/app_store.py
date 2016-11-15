@@ -1,7 +1,7 @@
 import os
 import zipfile
 import requests
-from libs import logger
+from blackflow.libs import logger
 
 from blackflow.libs.utils import compose_app_full_name, split_app_full_name
 
