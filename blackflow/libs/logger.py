@@ -4,25 +4,25 @@ import Queue
 import threading
 
 log_queue = Queue.Queue()
-logger = logging.getLogger("main")
+logger = logging.getLogger("bf")
 log_writer = logging.getLogger("writer")
 is_running = True
-#logging.config.dictConfig(logconfig.config)
 
 
 # Should be invoked from main process .
-def configure(log_file="info.log"):
+def configure(log_file="info.log",logging_level=logging.INFO,enable_console=False):
     global queue_handler , log_writer
     queue_handler = QueueHandler(log_queue)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging_level)
     logger.addHandler(queue_handler)
-    handler = logging.handlers.RotatingFileHandler(log_file, 'a', 300, 0)
+    handler = logging.handlers.RotatingFileHandler(log_file, 'a', 400000, 2)
     console_handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s %(module)s %(name)s %(levelname)-8s %(message)s')
+    formatter = logging.Formatter('%(asctime)s %(levelname)-6s %(name)s %(lineno)d %(message)s')
     handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
     log_writer.addHandler(handler)
-    log_writer.addHandler(console_handler)
+    if enable_console:
+        log_writer.addHandler(console_handler)
     writer_thread = threading.Thread(target=run_queue_handler)
     writer_thread.start()
 
@@ -30,7 +30,7 @@ def configure(log_file="info.log"):
 def getLogger(name=None):
     if not name:
         name = "default"
-    return logging.getLogger("main."+name)
+    return logging.getLogger("bf."+name)
 
 
 def stopLogger():

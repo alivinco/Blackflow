@@ -10,5 +10,7 @@
     "username":"s5WUF0",
     "password":"fPUFt5lLEems"
   },
+  "log_level":"debug",
+  "enable_console":true,
   "log_dir": "./"
 }

@@ -6,6 +6,7 @@ sys.path.append("./blackflow/libs/site-packages")
 import signal
 import time
 import argparse
+import logging
 from blackflow.libs.context import BfContext
 from blackflow.adapters.mqtt_adapter import MqttAdapter
 from blackflow.core.app_manager import AppManager
@@ -46,12 +47,15 @@ if __name__ == "__main__":
     MQTT_PASSWORD = None
     MQTT_CLIENTID = ""
     GLOBAL_PREFIX = ""
-
+    ENABLE_CONSOLE = False
+    LOG_LEVEL = "info"
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--conf', help='Config file path', default=None)
     parser.add_argument('-a', '--apps', help='Apps storage folder', required=True)
     parser.add_argument('-n', '--name', help='Instance name', default=None)
     parser.add_argument('-l', '--log_dir', help='Directory for logs', default=None)
+    parser.add_argument('-lv', '--log_level', help='log level', default=None)
+    parser.add_argument('-con', '--console', help='Enable/disable console output', default=None)
     parser.add_argument('-mqh', '--mqtt_host', help='Mqtt broker host name', default=None)
     parser.add_argument('-mqp', '--mqtt_port', help='Mqtt broker port', default=None)
     parser.add_argument('-mu', '--mqtt_user', help='Mqtt broker username', default=None)
@@ -67,6 +71,10 @@ if __name__ == "__main__":
             MQTT_PORT = configs["mqtt"]["port"]
             MQTT_USERNAME = configs["mqtt"]["username"]
             MQTT_PASSWORD = configs["mqtt"]["password"]
+            ENABLE_CONSOLE = configs["enable_console"]
+            LOG_LEVEL = configs["log_level"]
+
+
     else:
         configs = {"instance_config": {"name": "default"}}
 
@@ -75,6 +83,8 @@ if __name__ == "__main__":
     if args.mqtt_user: MQTT_USERNAME = args.mqtt_user
     if args.mqtt_pass: MQTT_PASSWORD = args.mqtt_pass
     if args.log_dir: LOG_DIR = args.log_dir
+    if args.log_level: LOG_LEVEL = args.log_level
+    if args.console: ENABLE_CONSOLE = bool(args.enable_console)
     if args.name: CONTAINER_NAME = args.name
 
     if env.get("ZM_MQTT_BROKER_ADDR"):
@@ -97,6 +107,13 @@ if __name__ == "__main__":
         CONTAINER_NAME = env.get("ZM_APP_INSTANCE")
     if env.get("ZM_DOMAIN"):
         GLOBAL_PREFIX = env.get("ZM_DOMAIN")
+
+    if env.get("ZM_LOG_LEVEL"):
+        LOG_LEVEL = env.get("ZM_LOG_LEVEL")
+
+    if env.get("ZM_ENABLE_CONSOLE"):
+        ENABLE_CONSOLE = env.get("ZM_ENABLE_CONSOLE")
+
     elif configs["mqtt"]["topic_prefix"]:
         GLOBAL_PREFIX = configs["mqtt"]["topic_prefix"]
 
@@ -111,14 +128,18 @@ if __name__ == "__main__":
     print "MQTT_PORT=%s" % MQTT_PORT
     print "APPS_DIR=%s" % args.apps
     print "LOG_DIR=%s" % LOG_DIR
+    print "LOG_LEVEL=%s" % LOG_LEVEL
+    print "ENABLE_CONSOLE=%s" % ENABLE_CONSOLE
 
     # blackflow.configs.log.config["handlers"]["info_file_handler"]["filename"] = os.path.join(LOG_DIR, "blackflow_info.log")
     # blackflow.configs.log.config["handlers"]["error_file_handler"]["filename"] = os.path.join(LOG_DIR, "blackflow_error.log")
     # logging.config.dictConfig(blackflow.configs.log.config)
     configs["apps_dir_path"] = args.apps
 
-    log = logger.getLogger("bf_service")
-    logger.configure("blackflow.log")
+    log = logger.getLogger("main")
+
+    level_map = dict(info=logging.INFO, debug=logging.DEBUG, error=logging.ERROR, warn=logging.WARN)
+    logger.configure(os.path.join(LOG_DIR, "blackflow.log"),logging_level=level_map[LOG_LEVEL],enable_console=ENABLE_CONSOLE)
 
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)

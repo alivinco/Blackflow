@@ -7,11 +7,10 @@ from libs import logger
 import importlib
 import json
 import os
-# import logging
 import shutil
 
 __author__ = 'alivinco'
-log = logger.getLogger("mqtt_adapter")
+log = logger.getLogger("app_manager")
 
 
 class AppInstanceState:

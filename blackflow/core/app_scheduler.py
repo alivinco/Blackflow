@@ -1,7 +1,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from libs import logger
 import copy
-log = logger.getLogger("bf_app_scheduler")
+log = logger.getLogger("app_scheduler")
 
 
 class AppScheduler:

@@ -1,4 +1,4 @@
-import logger
+from libs import logger
 
 __author__ = 'alivinco'
 
@@ -26,7 +26,7 @@ class BfApp:
         self.pub_to = publishes_to
         self.configs = configs
         self.alias = alias
-        self.log = logger.getLogger("")
+        self.log = logger.getLogger("app.%s.%s"%(self.__class__.__name__,self.id))
 
     def get_id(self):
         return self.id

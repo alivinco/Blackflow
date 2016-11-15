@@ -9,7 +9,7 @@ from blackflow.libs.iot_msg_lib.iot_msg_converter import IotMsgConverter
 
 __author__ = 'alivinco'
 
-log = logger.getLogger(__name__)
+log = logger.getLogger("api_mqtt_handler")
 
 class ApiMqttHandler:
     def __init__(self, app_manager, mqtt_adapter, context, instance_name, configs={}):
