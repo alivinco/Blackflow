@@ -9,7 +9,9 @@ touch /var/lib/blackflow/apps/__init__.py
 touch /var/lib/blackflow/apps/lib/__init__.py
 
 # Install service
-chmod a+x /etc/init.d/blackflow
-update-rc.d -f ${APP} remove
-update-rc.d ${APP} defaults 30
-service ${APP} start
+#chmod a+x /etc/init.d/blackflow
+#update-rc.d -f ${APP} remove
+#update-rc.d ${APP} defaults 30
+#service ${APP} start
+systemctl enable ${APP}
+systemctl start ${APP}

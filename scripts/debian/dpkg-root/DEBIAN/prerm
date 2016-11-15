@@ -1,7 +1,8 @@
 #!/bin/sh
 APP=blackflow
 
-service ${APP} stop
+#service ${APP} stop
+systemctl stop ${APP}
 
 if [ "$1" = "remove" ]; then
 find /usr/lib/${APP} | grep "\.pyc$" | xargs rm

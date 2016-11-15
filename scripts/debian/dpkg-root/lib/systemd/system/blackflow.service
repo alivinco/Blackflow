@@ -1,0 +1,21 @@
+[Unit]
+Description=Blackflow service
+After=network.target
+Requires=network.target
+
+[Service]
+Type=simple
+RemainAfterExit=no
+StartLimitInterval=0
+PIDFile=/var/run/blackflow.pid
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/blackflow
+ExecStart=/usr/bin/python /usr/lib/blackflow/blackflow_service.py -c /etc/blackflow/blackflow_config.json -a /var/lib/blackflow/apps
+ExecReload=/bin/kill -HUP $MAINPID
+WorkingDirectory=/usr/lib/blackflow
+User=root
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
