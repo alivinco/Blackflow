@@ -89,7 +89,7 @@ class MqttAdapter(Adapter):
         try:
             if self.global_prefix:
                 msg.topic = msg.topic.replace(self.global_prefix+"/","")
-            log.debug("Final on message topic %s"%msg.topic)
+            log.debug("New msg from topic %s"%msg.topic)
             iot_msg = IotMsgConverter.string_to_iot_msg(msg.topic, msg.payload)
             if msg.topic in self.api_sub:
                 try:
@@ -106,10 +106,10 @@ class MqttAdapter(Adapter):
         if self.adapter_prefix in topic:
             topic = topic.replace(self.adapter_prefix, "")
             final_topic = self.global_prefix+"/"+topic if self.global_prefix else topic
-            self.mqtt.publish(final_topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
+            self.mqtt.publish(final_topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=0)
         elif topic in self.api_pub:
             final_topic = self.global_prefix+"/"+topic if self.global_prefix else topic
-            self.mqtt.publish(final_topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=1)
+            self.mqtt.publish(final_topic, IotMsgConverter.iot_msg_with_topic_to_str(topic, iot_msg), qos=0)
 
     def initialize(self):
         self.mqtt.connect(self.hostname, self.port)

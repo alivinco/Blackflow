@@ -17,7 +17,7 @@ def configure(log_file="info.log",logging_level=logging.INFO,enable_console=Fals
     logger.addHandler(queue_handler)
     handler = logging.handlers.RotatingFileHandler(log_file, 'a', 400000, 2)
     console_handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s %(levelname)-6s %(name)s %(lineno)d %(message)s')
+    formatter = logging.Formatter('%(asctime)s %(levelname)-6s %(name)s %(lineno)d %(message)s :')
     handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
     log_writer.addHandler(handler)
